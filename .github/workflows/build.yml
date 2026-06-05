@@ -28,7 +28,23 @@ jobs:
         run: chmod +x ./gradlew
 
       - name: Build release APK
-        run: ./gradlew assembleRelease --no-daemon --stacktrace
+        run: |
+          set -o pipefail
+          ./gradlew assembleRelease --no-daemon --stacktrace 2>&1 | tee build.log
+
+      - name: Surface build errors on failure
+        if: failure()
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          {
+            echo '### Otomatik derleme hata logu'
+            echo
+            echo '```'
+            tail -n 250 build.log
+            echo '```'
+          } > issue_body.md
+          gh issue create --title "CI build log ${{ github.run_id }}" --body-file issue_body.md || true
 
       - name: Rename APK
         run: cp app/build/outputs/apk/release/app-release.apk Odak.apk

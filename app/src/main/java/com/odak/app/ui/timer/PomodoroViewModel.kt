@@ -1,11 +1,13 @@
 package com.odak.app.ui.timer
 
+import android.app.Application
 import android.os.SystemClock
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
-import androidx.lifecycle.ViewModel
+import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
+import com.odak.app.timer.TimerService
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.isActive
@@ -17,7 +19,7 @@ enum class PomoPhase(val label: String) {
     LONG_BREAK("Uzun Mola")
 }
 
-class PomodoroViewModel : ViewModel() {
+class PomodoroViewModel(app: Application) : AndroidViewModel(app) {
 
     var workMin by mutableStateOf(25)
         private set
@@ -70,6 +72,15 @@ class PomodoroViewModel : ViewModel() {
         if (running || remaining <= 0) return
         running = true
         endAt = SystemClock.elapsedRealtime() + remaining
+        TimerService.startCountdown(
+            getApplication<Application>(),
+            TimerService.KEY_POMODORO,
+            endAt,
+            title = "Pomodoro · ${phase.label}",
+            finishTitle = "Pomodoro",
+            finishMessage = messageFor(nextPhasePreview()),
+            finishAlertId = 1002
+        )
         job = viewModelScope.launch {
             while (isActive) {
                 remaining = (endAt - SystemClock.elapsedRealtime()).coerceAtLeast(0)
@@ -80,6 +91,20 @@ class PomodoroViewModel : ViewModel() {
                 delay(50)
             }
         }
+    }
+
+    /** The phase that will start once the current one ends (no state change). */
+    private fun nextPhasePreview(): PomoPhase = if (phase == PomoPhase.WORK) {
+        if ((completedSessions + 1) % cyclesBeforeLong == 0) PomoPhase.LONG_BREAK
+        else PomoPhase.SHORT_BREAK
+    } else {
+        PomoPhase.WORK
+    }
+
+    private fun messageFor(next: PomoPhase): String = when (next) {
+        PomoPhase.WORK -> "Mola bitti — odak zamanı!"
+        PomoPhase.SHORT_BREAK -> "Odak tamamlandı — kısa mola!"
+        PomoPhase.LONG_BREAK -> "Odak tamamlandı — uzun mola!"
     }
 
     private fun advancePhase(onPhaseEnd: (PomoPhase) -> Unit) {
@@ -98,6 +123,7 @@ class PomodoroViewModel : ViewModel() {
     fun pause() {
         running = false
         job?.cancel()
+        TimerService.stop(getApplication<Application>(), TimerService.KEY_POMODORO)
     }
 
     fun reset() {

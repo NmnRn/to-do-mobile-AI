@@ -32,6 +32,9 @@ interface TaskDao {
     @Query("SELECT * FROM tasks WHERE id = :id")
     suspend fun getById(id: Long): Task?
 
+    @Query("SELECT * FROM tasks WHERE dueDate = :day AND status != 'DONE' ORDER BY createdAt DESC")
+    suspend fun pendingForDay(day: Long): List<Task>
+
     @Query("UPDATE tasks SET focusSeconds = focusSeconds + :seconds WHERE id = :id")
     suspend fun addFocusSeconds(id: Long, seconds: Long)
 }

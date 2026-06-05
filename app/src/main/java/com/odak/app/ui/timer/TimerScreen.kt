@@ -21,7 +21,6 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
@@ -31,13 +30,11 @@ import com.odak.app.ui.components.ControlRow
 import com.odak.app.ui.components.PrimaryControl
 import com.odak.app.ui.components.SecondaryControl
 import com.odak.app.ui.components.Stepper
-import com.odak.app.util.Alert
 import com.odak.app.util.TimeFormat
 
 @OptIn(ExperimentalLayoutApi::class)
 @Composable
 fun TimerScreen(vm: CountdownViewModel) {
-    val context = LocalContext.current
     val presets = listOf(1, 3, 5, 10, 15, 25, 45, 60)
     val isIdle = !vm.running && vm.remaining == vm.totalMillis
 
@@ -96,11 +93,7 @@ fun TimerScreen(vm: CountdownViewModel) {
             PrimaryControl(
                 label = if (vm.running) "Duraklat" else "Başlat",
                 icon = if (vm.running) Icons.Filled.Pause else Icons.Filled.PlayArrow,
-                onClick = {
-                    vm.toggle {
-                        Alert.fire(context, "Süre doldu", "Zamanlayıcı tamamlandı", id = 1001)
-                    }
-                }
+                onClick = { vm.toggle {} }
             )
             SecondaryControl("Sıfırla", Icons.Filled.Refresh, onClick = { vm.reset() })
         }

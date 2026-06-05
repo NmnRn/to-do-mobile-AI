@@ -25,7 +25,6 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
@@ -35,24 +34,17 @@ import com.odak.app.ui.components.ControlRow
 import com.odak.app.ui.components.PrimaryControl
 import com.odak.app.ui.components.SecondaryControl
 import com.odak.app.ui.components.Stepper
-import com.odak.app.util.Alert
 import com.odak.app.util.TimeFormat
 
 @Composable
 fun PomodoroScreen(vm: PomodoroViewModel) {
-    val context = LocalContext.current
     val isWork = vm.phase == PomoPhase.WORK
     val ringColor =
         if (isWork) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.secondary
 
-    val onPhaseEnd: (PomoPhase) -> Unit = { next ->
-        val message = when (next) {
-            PomoPhase.WORK -> "Mola bitti — odak zamanı!"
-            PomoPhase.SHORT_BREAK -> "Odak tamamlandı — kısa mola!"
-            PomoPhase.LONG_BREAK -> "Odak tamamlandı — uzun mola!"
-        }
-        Alert.fire(context, "Pomodoro", message, id = 1002)
-    }
+    // The end-of-phase alert is fired by TimerService so it works in the
+    // background too; the screen just keeps the UI in sync.
+    val onPhaseEnd: (PomoPhase) -> Unit = { }
 
     Column(
         modifier = Modifier

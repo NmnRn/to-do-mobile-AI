@@ -21,11 +21,18 @@ import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
+import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
+import com.odak.app.reminder.Reminders
 import com.odak.app.ui.theme.ThemeMode
 import com.odak.app.ui.theme.ThemeViewModel
 
@@ -43,6 +50,41 @@ fun SettingsScreen(themeVm: ThemeViewModel, updateVm: UpdateViewModel) {
             ThemeChip("Sistem", themeVm.mode == ThemeMode.SYSTEM) { themeVm.set(ThemeMode.SYSTEM) }
             ThemeChip("Aydınlık", themeVm.mode == ThemeMode.LIGHT) { themeVm.set(ThemeMode.LIGHT) }
             ThemeChip("Karanlık", themeVm.mode == ThemeMode.DARK) { themeVm.set(ThemeMode.DARK) }
+        }
+
+        Spacer(Modifier.height(20.dp))
+        HorizontalDivider()
+        Spacer(Modifier.height(20.dp))
+
+        // ---- Bildirimler ----
+        SectionTitle("Bildirimler")
+        val context = LocalContext.current
+        var remindersOn by remember { mutableStateOf(Reminders.isEnabled(context)) }
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.SpaceBetween
+        ) {
+            Column(Modifier.weight(1f)) {
+                Text(
+                    "Görev hatırlatmaları",
+                    style = MaterialTheme.typography.bodyLarge,
+                    color = MaterialTheme.colorScheme.onBackground
+                )
+                Text(
+                    "Bekleyen görevlerin için 3 saatte bir hatırlatma (gece sessiz)",
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                )
+            }
+            Spacer(Modifier.size(12.dp))
+            Switch(
+                checked = remindersOn,
+                onCheckedChange = {
+                    remindersOn = it
+                    Reminders.setEnabled(context, it)
+                }
+            )
         }
 
         Spacer(Modifier.height(20.dp))

@@ -2,17 +2,17 @@ package com.odak.app.ui.theme
 
 import androidx.compose.ui.graphics.Color
 
-// Calming sage-green palette
-val Sage = Color(0xFF6B8F71)
-val SageDark = Color(0xFF4F6F55)
-val SageLight = Color(0xFF8FB096)
-val SageContainer = Color(0xFFDCE7DC)
-val Cream = Color(0xFFF5F4EE)
-val CreamSurface = Color(0xFFFBFAF5)
-val Charcoal = Color(0xFF2E3A2F)
-val Clay = Color(0xFFC98A6B)
-val ClayContainer = Color(0xFFF1DDD2)
-val MutedText = Color(0xFF6B7268)
+// Calming sage-green palette (light & airy)
+val Sage = Color(0xFF72A37B)
+val SageDark = Color(0xFF54805C)
+val SageLight = Color(0xFFB7D3BC)
+val SageContainer = Color(0xFFE6F1E6)
+val Cream = Color(0xFFF8FBF6)
+val CreamSurface = Color(0xFFFFFFFF)
+val Charcoal = Color(0xFF374239)
+val Clay = Color(0xFFD49A7E)
+val ClayContainer = Color(0xFFF6E6DC)
+val MutedText = Color(0xFF77806F)
 
 // Dark variants
 val SageNight = Color(0xFF9CC0A2)

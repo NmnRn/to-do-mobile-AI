@@ -9,6 +9,8 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Pause
 import androidx.compose.material.icons.filled.PlayArrow
@@ -28,6 +30,7 @@ import com.odak.app.ui.components.CircularTimer
 import com.odak.app.ui.components.ControlRow
 import com.odak.app.ui.components.PrimaryControl
 import com.odak.app.ui.components.SecondaryControl
+import com.odak.app.ui.components.Stepper
 import com.odak.app.util.Buzz
 import com.odak.app.util.TimeFormat
 
@@ -41,11 +44,11 @@ fun TimerScreen(vm: CountdownViewModel) {
     Column(
         modifier = Modifier
             .fillMaxSize()
+            .verticalScroll(rememberScrollState())
             .padding(24.dp),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
-        Text("Zamanlayıcı", style = MaterialTheme.typography.headlineMedium)
-        Spacer(Modifier.height(24.dp))
+        Spacer(Modifier.height(8.dp))
 
         CircularTimer(progress = vm.progress) {
             Text(
@@ -57,9 +60,22 @@ fun TimerScreen(vm: CountdownViewModel) {
             )
         }
 
-        Spacer(Modifier.height(28.dp))
+        Spacer(Modifier.height(20.dp))
 
         if (isIdle) {
+            Stepper(
+                label = "Dakika",
+                value = "${vm.totalSeconds / 60}",
+                onMinus = { vm.changeSeconds(-60) },
+                onPlus = { vm.changeSeconds(60) }
+            )
+            Stepper(
+                label = "Saniye",
+                value = "${vm.totalSeconds % 60}",
+                onMinus = { vm.changeSeconds(-5) },
+                onPlus = { vm.changeSeconds(5) }
+            )
+            Spacer(Modifier.height(12.dp))
             FlowRow(
                 horizontalArrangement = Arrangement.spacedBy(8.dp),
                 verticalArrangement = Arrangement.spacedBy(4.dp),

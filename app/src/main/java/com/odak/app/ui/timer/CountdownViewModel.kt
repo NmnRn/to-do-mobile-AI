@@ -33,6 +33,16 @@ class CountdownViewModel : ViewModel() {
         remaining = totalMillis
     }
 
+    val totalSeconds: Long get() = totalMillis / 1000
+
+    /** Manually adjust the duration by [delta] seconds (kept within 5s..180min). */
+    fun changeSeconds(delta: Int) {
+        if (running) return
+        val newTotal = (totalSeconds + delta).coerceIn(5L, 180L * 60L)
+        totalMillis = newTotal * 1000
+        remaining = totalMillis
+    }
+
     fun toggle(onFinish: () -> Unit) = if (running) pause() else start(onFinish)
 
     fun start(onFinish: () -> Unit) {

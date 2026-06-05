@@ -59,6 +59,10 @@ class PomodoroViewModel : ViewModel() {
         remaining = phaseTotalMillis()
     }
 
+    fun changeWork(delta: Int) = setDurations(workMin + delta, shortMin, longMin)
+    fun changeShort(delta: Int) = setDurations(workMin, shortMin + delta, longMin)
+    fun changeLong(delta: Int) = setDurations(workMin, shortMin, longMin + delta)
+
     fun toggle(onPhaseEnd: (PomoPhase) -> Unit) =
         if (running) pause() else start(onPhaseEnd)
 

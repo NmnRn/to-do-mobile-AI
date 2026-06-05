@@ -39,8 +39,7 @@ fun StopwatchScreen(vm: StopwatchViewModel) {
             .padding(24.dp),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
-        Text("Kronometre", style = MaterialTheme.typography.headlineMedium)
-        Spacer(Modifier.height(32.dp))
+        Spacer(Modifier.height(24.dp))
 
         CircularTimer(progress = (vm.elapsed % 60_000L) / 60_000f) {
             Text(

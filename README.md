@@ -20,7 +20,7 @@ Android uygulaması.
 > APK her güncellemede GitHub Actions tarafından otomatik derlenir.
 
 **Tek tıkla indir:**
-👉 https://github.com/KULLANICI_ADI/REPO_ADI/releases/latest/download/Odak.apk
+👉 https://github.com/NmnRn/to-do-mobile-AI/releases/latest/download/Odak.apk
 
 Kurulum:
 1. APK'yı telefonuna indir.

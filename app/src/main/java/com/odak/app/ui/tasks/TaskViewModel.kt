@@ -8,10 +8,16 @@ import androidx.compose.runtime.snapshotFlow
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
 import com.odak.app.OdakApp
+import com.odak.app.data.Priority
+import com.odak.app.data.RepeatRule
+import com.odak.app.data.SubTask
 import com.odak.app.data.Task
 import com.odak.app.data.TaskStatus
+import com.odak.app.task.Recurrence
+import com.odak.app.task.TaskAlarms
 import com.odak.app.util.DateUtils
 import com.odak.app.util.ImageStorage
+import com.odak.app.widget.TodayWidget
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
@@ -45,37 +51,92 @@ class TaskViewModel(app: Application) : AndroidViewModel(app) {
             TaskStatus.IN_PROGRESS -> TaskStatus.DONE
             TaskStatus.DONE -> TaskStatus.WAITING
         }
-        viewModelScope.launch { repo.upsert(task.copy(status = next)) }
+        viewModelScope.launch {
+            val updated = task.copy(status = next)
+            repo.upsert(updated)
+            // Completing a repeating task spawns its next occurrence.
+            if (next == TaskStatus.DONE && task.repeat != RepeatRule.NONE) {
+                Recurrence.next(task)?.let { spawn ->
+                    val newId = repo.upsert(spawn)
+                    syncAlarm(spawn.copy(id = newId))
+                }
+            }
+            syncAlarm(updated)
+            refreshWidget()
+        }
     }
 
-    fun save(existing: Task?, title: String, note: String, status: TaskStatus, photoPath: String?) {
+    /** Toggles a single checklist item on a task. */
+    fun toggleSubtask(task: Task, index: Int) {
+        val subs = task.subtasks.toMutableList()
+        if (index !in subs.indices) return
+        subs[index] = subs[index].copy(done = !subs[index].done)
+        viewModelScope.launch {
+            repo.upsert(task.copy(subtasks = subs))
+            refreshWidget()
+        }
+    }
+
+    fun save(
+        existing: Task?,
+        title: String,
+        note: String,
+        status: TaskStatus,
+        photoPath: String?,
+        dueMinute: Int,
+        priority: Priority,
+        category: String,
+        repeat: RepeatRule,
+        subtasks: List<SubTask>
+    ) {
         val cleanTitle = title.trim()
         if (cleanTitle.isEmpty()) return
         viewModelScope.launch {
-            // If the photo was replaced or removed, clean up the old file.
             if (existing?.photoPath != null && existing.photoPath != photoPath) {
                 ImageStorage.deleteQuietly(existing.photoPath)
             }
-            val task = existing?.copy(
+            val base = existing?.copy(
                 title = cleanTitle,
                 note = note.trim(),
                 status = status,
-                photoPath = photoPath
+                photoPath = photoPath,
+                dueMinute = dueMinute,
+                priority = priority,
+                category = category.trim(),
+                repeat = repeat,
+                subtasks = subtasks
             ) ?: Task(
                 title = cleanTitle,
                 note = note.trim(),
                 status = status,
                 photoPath = photoPath,
-                dueDate = selectedDay
+                dueDate = selectedDay,
+                dueMinute = dueMinute,
+                priority = priority,
+                category = category.trim(),
+                repeat = repeat,
+                subtasks = subtasks
             )
-            repo.upsert(task)
+            val id = repo.upsert(base)
+            syncAlarm(base.copy(id = id))
+            refreshWidget()
         }
     }
 
     fun delete(task: Task) {
         viewModelScope.launch {
             ImageStorage.deleteQuietly(task.photoPath)
+            TaskAlarms.cancel(getApplication<Application>(), task.id)
             repo.delete(task)
+            refreshWidget()
         }
+    }
+
+    private fun syncAlarm(task: Task) {
+        TaskAlarms.sync(getApplication<Application>(), task)
+    }
+
+    private fun refreshWidget() {
+        TodayWidget.refresh(getApplication<Application>())
     }
 }

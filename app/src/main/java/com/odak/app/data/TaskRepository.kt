@@ -16,4 +16,19 @@ class TaskRepository(private val dao: TaskDao) {
     suspend fun addFocusSeconds(id: Long, seconds: Long) = dao.addFocusSeconds(id, seconds)
 
     suspend fun pendingForDay(day: Long): List<Task> = dao.pendingForDay(day)
+
+    suspend fun getById(id: Long): Task? = dao.getById(id)
+
+    suspend fun timedTasks(): List<Task> = dao.timedTasks()
+
+    suspend fun between(start: Long, end: Long): List<Task> = dao.between(start, end)
+
+    suspend fun categories(): List<String> = dao.categories()
+
+    suspend fun all(): List<Task> = dao.all()
+
+    suspend fun replaceAll(tasks: List<Task>) {
+        dao.clear()
+        tasks.forEach { dao.insert(it.copy(id = 0)) }
+    }
 }

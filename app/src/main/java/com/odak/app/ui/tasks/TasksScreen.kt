@@ -98,8 +98,11 @@ fun TasksScreen(vm: TaskViewModel) {
         TaskEditorSheet(
             existing = editing,
             onDismiss = { showSheet = false },
-            onSave = { title, note, status, photo ->
-                vm.save(editing, title, note, status, photo)
+            onSave = { title, note, status, photo, dueMinute, priority, category, repeat, subtasks ->
+                vm.save(
+                    editing, title, note, status, photo,
+                    dueMinute, priority, category, repeat, subtasks
+                )
                 showSheet = false
             }
         )

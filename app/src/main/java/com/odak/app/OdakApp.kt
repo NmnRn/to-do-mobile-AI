@@ -4,14 +4,26 @@ import android.app.Application
 import com.odak.app.data.AppDatabase
 import com.odak.app.data.TaskRepository
 import com.odak.app.reminder.Reminders
+import com.odak.app.task.TaskAlarms
 import com.odak.app.util.Alert
+import com.odak.app.widget.TodayWidget
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.SupervisorJob
+import kotlinx.coroutines.launch
 
 class OdakApp : Application() {
     val repository: TaskRepository by lazy { TaskRepository(AppDatabase.get(this).taskDao()) }
+
+    private val appScope = CoroutineScope(SupervisorJob() + Dispatchers.IO)
 
     override fun onCreate() {
         super.onCreate()
         Alert.ensureChannel(this)
         Reminders.syncSchedule(this)
+        appScope.launch {
+            TaskAlarms.rescheduleAll(this@OdakApp, repository.timedTasks())
+            TodayWidget.refresh(this@OdakApp)
+        }
     }
 }

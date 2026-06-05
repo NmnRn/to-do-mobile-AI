@@ -27,6 +27,10 @@ object DateUtils {
     }
 
     private val dayFormat = SimpleDateFormat("d MMMM EEEE", Locale("tr", "TR"))
+    private val shortDayFormat = SimpleDateFormat("EEE", Locale("tr", "TR"))
+
+    /** Short weekday label (e.g. "Pzt") for the weekly report. */
+    fun shortWeekday(dayStart: Long): String = shortDayFormat.format(dayStart)
 
     fun label(dayStart: Long): String = when (dayStart) {
         today() -> "Bugün"

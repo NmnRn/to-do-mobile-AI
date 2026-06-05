@@ -2,7 +2,12 @@ package com.odak.app.ui.settings
 
 import android.app.TimePickerDialog
 import android.content.Context
+import android.widget.Toast
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -11,6 +16,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
@@ -27,18 +33,32 @@ import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
+import androidx.compose.foundation.shape.RoundedCornerShape
+import com.odak.app.OdakApp
 import com.odak.app.reminder.Reminders
+import com.odak.app.task.TaskAlarms
 import com.odak.app.ui.theme.ThemeMode
 import com.odak.app.ui.theme.ThemeViewModel
+import com.odak.app.util.Backup
+import com.odak.app.util.DateUtils
+import com.odak.app.util.Reports
+import com.odak.app.util.WeeklyReport
+import com.odak.app.widget.TodayWidget
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 
 @Composable
 fun SettingsScreen(themeVm: ThemeViewModel, updateVm: UpdateViewModel) {
@@ -156,6 +176,95 @@ fun SettingsScreen(themeVm: ThemeViewModel, updateVm: UpdateViewModel) {
         HorizontalDivider()
         Spacer(Modifier.height(20.dp))
 
+        // ---- Odak raporu ----
+        SectionTitle("Bu hafta")
+        val app = context.applicationContext as OdakApp
+        val scope = rememberCoroutineScope()
+        var reloadKey by remember { mutableIntStateOf(0) }
+        var report by remember { mutableStateOf<WeeklyReport?>(null) }
+        LaunchedEffect(reloadKey) {
+            report = Reports.weekly(app.repository)
+        }
+        report?.let { r ->
+            Text(
+                "${r.totalDone}/${r.totalTasks} görev tamamlandı · ${r.focusMinutes} dk odak",
+                style = MaterialTheme.typography.bodyMedium,
+                color = MaterialTheme.colorScheme.onSurfaceVariant
+            )
+            Spacer(Modifier.height(12.dp))
+            WeekBars(r)
+        }
+
+        Spacer(Modifier.height(20.dp))
+        HorizontalDivider()
+        Spacer(Modifier.height(20.dp))
+
+        // ---- Yedekleme ----
+        SectionTitle("Yedekleme")
+        val exportLauncher = rememberLauncherForActivityResult(
+            ActivityResultContracts.CreateDocument("application/json")
+        ) { uri ->
+            if (uri != null) scope.launch {
+                val ok = withContext(Dispatchers.IO) {
+                    runCatching {
+                        val json = Backup.toJson(app.repository.all())
+                        context.contentResolver.openOutputStream(uri)?.use {
+                            it.write(json.toByteArray())
+                        }
+                        true
+                    }.getOrDefault(false)
+                }
+                Toast.makeText(
+                    context,
+                    if (ok) "Yedek kaydedildi" else "Yedek alınamadı",
+                    Toast.LENGTH_SHORT
+                ).show()
+            }
+        }
+        val importLauncher = rememberLauncherForActivityResult(
+            ActivityResultContracts.OpenDocument()
+        ) { uri ->
+            if (uri != null) scope.launch {
+                val ok = withContext(Dispatchers.IO) {
+                    runCatching {
+                        val text = context.contentResolver.openInputStream(uri)?.use {
+                            it.readBytes().decodeToString()
+                        } ?: return@runCatching false
+                        app.repository.replaceAll(Backup.fromJson(text))
+                        TaskAlarms.rescheduleAll(context, app.repository.timedTasks())
+                        true
+                    }.getOrDefault(false)
+                }
+                TodayWidget.refresh(context)
+                reloadKey++
+                Toast.makeText(
+                    context,
+                    if (ok) "Yedek geri yüklendi" else "Geri yükleme başarısız",
+                    Toast.LENGTH_SHORT
+                ).show()
+            }
+        }
+        Text(
+            "Görevlerini JSON dosyası olarak dışa aktar ya da geri yükle (fotoğraflar hariç).",
+            style = MaterialTheme.typography.bodySmall,
+            color = MaterialTheme.colorScheme.onSurfaceVariant
+        )
+        Spacer(Modifier.height(12.dp))
+        Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
+            OutlinedButton(
+                onClick = { exportLauncher.launch("odak-yedek.json") },
+                modifier = Modifier.weight(1f)
+            ) { Text("Dışa aktar") }
+            OutlinedButton(
+                onClick = { importLauncher.launch(arrayOf("application/json")) },
+                modifier = Modifier.weight(1f)
+            ) { Text("Geri yükle") }
+        }
+
+        Spacer(Modifier.height(20.dp))
+        HorizontalDivider()
+        Spacer(Modifier.height(20.dp))
+
         // ---- Güncelleme ----
         SectionTitle("Güncelleme")
         Text(
@@ -223,6 +332,44 @@ fun SettingsScreen(themeVm: ThemeViewModel, updateVm: UpdateViewModel) {
             style = MaterialTheme.typography.bodyMedium,
             color = MaterialTheme.colorScheme.onSurfaceVariant
         )
+    }
+}
+
+@Composable
+private fun WeekBars(report: WeeklyReport) {
+    val max = report.maxDone.coerceAtLeast(1)
+    Row(
+        modifier = Modifier.fillMaxWidth(),
+        horizontalArrangement = Arrangement.SpaceBetween,
+        verticalAlignment = Alignment.Bottom
+    ) {
+        report.days.forEach { day ->
+            val frac = day.done.toFloat() / max
+            Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                Text(
+                    day.done.toString(),
+                    style = MaterialTheme.typography.labelSmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                )
+                Spacer(Modifier.height(4.dp))
+                Box(
+                    modifier = Modifier
+                        .width(20.dp)
+                        .height((6 + frac * 64).dp)
+                        .clip(RoundedCornerShape(6.dp))
+                        .background(
+                            if (day.done > 0) MaterialTheme.colorScheme.primary
+                            else MaterialTheme.colorScheme.surfaceVariant
+                        )
+                )
+                Spacer(Modifier.height(4.dp))
+                Text(
+                    DateUtils.shortWeekday(day.dayStart),
+                    style = MaterialTheme.typography.labelSmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                )
+            }
+        }
     }
 }
 

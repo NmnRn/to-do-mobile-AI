@@ -3,10 +3,12 @@ package com.odak.app.ui.tasks
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
@@ -33,6 +35,8 @@ import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import coil.compose.AsyncImage
+import com.odak.app.data.Priority
+import com.odak.app.data.RepeatRule
 import com.odak.app.data.Task
 import com.odak.app.data.TaskStatus
 import java.io.File
@@ -56,6 +60,9 @@ fun TaskCard(
             modifier = Modifier.padding(12.dp),
             verticalAlignment = Alignment.CenterVertically
         ) {
+            PriorityBar(task.priority)
+            Spacer(Modifier.width(10.dp))
+
             StatusButton(status = task.status, onClick = onToggleStatus)
 
             Spacer(Modifier.width(12.dp))
@@ -80,7 +87,7 @@ fun TaskCard(
                     )
                 }
                 Spacer(Modifier.size(4.dp))
-                StatusLabel(task.status)
+                MetaRow(task)
             }
 
             if (task.photoPath != null) {
@@ -145,11 +152,59 @@ private fun StatusButton(status: TaskStatus, onClick: () -> Unit) {
 }
 
 @Composable
-private fun StatusLabel(status: TaskStatus) {
-    val (text, color) = when (status) {
-        TaskStatus.WAITING -> "Bekliyor" to MaterialTheme.colorScheme.onSurfaceVariant
-        TaskStatus.IN_PROGRESS -> "Devam ediyor" to MaterialTheme.colorScheme.secondary
-        TaskStatus.DONE -> "Yapıldı" to MaterialTheme.colorScheme.primary
+private fun PriorityBar(priority: Priority) {
+    val color = when (priority) {
+        Priority.HIGH -> MaterialTheme.colorScheme.error
+        Priority.MEDIUM -> MaterialTheme.colorScheme.secondary
+        Priority.LOW -> MaterialTheme.colorScheme.outline
     }
-    Text(text = text, style = MaterialTheme.typography.labelLarge, color = color)
+    Box(
+        modifier = Modifier
+            .width(4.dp)
+            .height(40.dp)
+            .clip(RoundedCornerShape(2.dp))
+            .background(color)
+    )
+}
+
+@Composable
+private fun MetaRow(task: Task) {
+    val statusText = when (task.status) {
+        TaskStatus.WAITING -> "Bekliyor"
+        TaskStatus.IN_PROGRESS -> "Devam ediyor"
+        TaskStatus.DONE -> "Yapıldı"
+    }
+    val statusColor = when (task.status) {
+        TaskStatus.WAITING -> MaterialTheme.colorScheme.onSurfaceVariant
+        TaskStatus.IN_PROGRESS -> MaterialTheme.colorScheme.secondary
+        TaskStatus.DONE -> MaterialTheme.colorScheme.primary
+    }
+    Row(
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.spacedBy(10.dp)
+    ) {
+        Text(statusText, style = MaterialTheme.typography.labelLarge, color = statusColor)
+        if (task.dueMinute >= 0) {
+            MetaText("🕘 %02d:%02d".format(task.dueMinute / 60, task.dueMinute % 60))
+        }
+        if (task.repeat != RepeatRule.NONE) {
+            MetaText("🔁")
+        }
+        if (task.subtasks.isNotEmpty()) {
+            val done = task.subtasks.count { it.done }
+            MetaText("☑ $done/${task.subtasks.size}")
+        }
+        if (task.category.isNotBlank()) {
+            MetaText("🏷 ${task.category}")
+        }
+    }
+}
+
+@Composable
+private fun MetaText(text: String) {
+    Text(
+        text = text,
+        style = MaterialTheme.typography.labelMedium,
+        color = MaterialTheme.colorScheme.onSurfaceVariant
+    )
 }

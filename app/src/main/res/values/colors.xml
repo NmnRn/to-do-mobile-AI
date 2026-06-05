@@ -3,4 +3,6 @@
     <color name="odak_background">#F8FBF6</color>
     <color name="odak_sage">#72A37B</color>
     <color name="ic_launcher_bg">#6B8F71</color>
+    <color name="widget_text">#1F2A22</color>
+    <color name="widget_text_dim">#5E6B61</color>
 </resources>

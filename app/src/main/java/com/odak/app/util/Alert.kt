@@ -16,6 +16,8 @@ import androidx.core.app.NotificationManagerCompat
 import androidx.core.content.ContextCompat
 import com.odak.app.MainActivity
 import com.odak.app.R
+import com.odak.app.data.Task
+import com.odak.app.task.TaskActionReceiver
 
 /**
  * Fires an end-of-timer alert: plays a sound, vibrates and posts a heads-up
@@ -161,6 +163,67 @@ object Alert {
             .setAutoCancel(true)
             .build()
         NotificationManagerCompat.from(context).notify(id, notification)
+    }
+
+    const val TASK_ALARM_BASE_ID = 4000
+
+    /**
+     * Posts a task's clock alarm: sound + vibration + heads-up with "Tamamlandı"
+     * and "Ertele" actions, plus a full-screen intent so it shows over the lock
+     * screen like an alarm.
+     */
+    fun fireTaskAlarm(context: Context, task: Task) {
+        ensureChannel(context)
+
+        Buzz.vibrate(context, 700)
+        playSound(context)
+
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU &&
+            ContextCompat.checkSelfPermission(context, Manifest.permission.POST_NOTIFICATIONS) !=
+            PackageManager.PERMISSION_GRANTED
+        ) return
+
+        val notifId = TASK_ALARM_BASE_ID + task.id.toInt()
+        val body = task.note.ifBlank { "Görev zamanı geldi" }
+
+        val builder = NotificationCompat.Builder(context, CHANNEL_ID)
+            .setSmallIcon(R.drawable.ic_stat_alarm)
+            .setContentTitle(task.title)
+            .setContentText(body)
+            .setStyle(NotificationCompat.BigTextStyle().bigText(body))
+            .setPriority(NotificationCompat.PRIORITY_HIGH)
+            .setCategory(NotificationCompat.CATEGORY_ALARM)
+            .setVisibility(NotificationCompat.VISIBILITY_PUBLIC)
+            .setContentIntent(openAppIntent(context))
+            .setFullScreenIntent(alarmFullScreenIntent(context), true)
+            .setAutoCancel(true)
+            .addAction(0, "Tamamlandı", taskActionIntent(
+                context, TaskActionReceiver.ACTION_DONE, task.id, notifId
+            ))
+            .addAction(0, "1 saat ertele", taskActionIntent(
+                context, TaskActionReceiver.ACTION_SNOOZE, task.id, notifId
+            ))
+
+        NotificationManagerCompat.from(context).notify(notifId, builder.build())
+    }
+
+    private fun taskActionIntent(
+        context: Context,
+        action: String,
+        taskId: Long,
+        notifId: Int
+    ): PendingIntent {
+        val intent = Intent(context, TaskActionReceiver::class.java).apply {
+            this.action = action
+            putExtra(TaskActionReceiver.EXTRA_TASK_ID, taskId)
+            putExtra(TaskActionReceiver.EXTRA_NOTIF_ID, notifId)
+        }
+        // Unique request code per (task, action) so intents don't collide.
+        val code = (taskId.toInt() * 8) + action.hashCode()
+        return PendingIntent.getBroadcast(
+            context, code, intent,
+            PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
+        )
     }
 
     private fun playSound(context: Context) {

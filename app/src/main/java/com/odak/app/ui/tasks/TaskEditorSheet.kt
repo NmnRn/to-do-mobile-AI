@@ -1,5 +1,6 @@
 package com.odak.app.ui.tasks
 
+import android.app.TimePickerDialog
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.PickVisualMediaRequest
 import androidx.activity.result.contract.ActivityResultContracts
@@ -13,16 +14,23 @@ import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Check
+import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.PhotoCamera
 import androidx.compose.material.icons.filled.PhotoLibrary
+import androidx.compose.material.icons.filled.Schedule
 import androidx.compose.material3.Button
+import androidx.compose.material3.Checkbox
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FilterChip
 import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.OutlinedButton
@@ -35,14 +43,19 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
+import androidx.compose.runtime.toMutableStateList
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.unit.dp
 import coil.compose.AsyncImage
+import com.odak.app.data.Priority
+import com.odak.app.data.RepeatRule
+import com.odak.app.data.SubTask
 import com.odak.app.data.Task
 import com.odak.app.data.TaskStatus
 import com.odak.app.util.ImageStorage
@@ -53,7 +66,17 @@ import java.io.File
 fun TaskEditorSheet(
     existing: Task?,
     onDismiss: () -> Unit,
-    onSave: (title: String, note: String, status: TaskStatus, photoPath: String?) -> Unit
+    onSave: (
+        title: String,
+        note: String,
+        status: TaskStatus,
+        photoPath: String?,
+        dueMinute: Int,
+        priority: Priority,
+        category: String,
+        repeat: RepeatRule,
+        subtasks: List<SubTask>
+    ) -> Unit
 ) {
     val context = LocalContext.current
     val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
@@ -63,6 +86,12 @@ fun TaskEditorSheet(
     var status by remember { mutableStateOf(existing?.status ?: TaskStatus.WAITING) }
     var photoPath by remember { mutableStateOf(existing?.photoPath) }
     var pendingCameraPath by remember { mutableStateOf<String?>(null) }
+    var dueMinute by remember { mutableStateOf(existing?.dueMinute ?: -1) }
+    var priority by remember { mutableStateOf(existing?.priority ?: Priority.MEDIUM) }
+    var category by remember { mutableStateOf(existing?.category ?: "") }
+    var repeat by remember { mutableStateOf(existing?.repeat ?: RepeatRule.NONE) }
+    val subtasks = remember { (existing?.subtasks ?: emptyList()).toMutableStateList() }
+    var newSubtask by remember { mutableStateOf("") }
 
     val galleryLauncher = rememberLauncherForActivityResult(
         ActivityResultContracts.PickVisualMedia()
@@ -84,6 +113,7 @@ fun TaskEditorSheet(
         Column(
             modifier = Modifier
                 .fillMaxWidth()
+                .verticalScroll(rememberScrollState())
                 .padding(horizontal = 24.dp)
                 .padding(bottom = 32.dp)
         ) {
@@ -109,15 +139,113 @@ fun TaskEditorSheet(
                 minLines = 2
             )
 
+            // ---- Saat ----
+            Spacer(Modifier.height(16.dp))
+            Text("Hatırlatma saati", style = MaterialTheme.typography.labelLarge)
+            Spacer(Modifier.height(8.dp))
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                OutlinedButton(onClick = {
+                    val initial = if (dueMinute >= 0) dueMinute else 9 * 60
+                    TimePickerDialog(
+                        context,
+                        { _, h, m -> dueMinute = h * 60 + m },
+                        initial / 60, initial % 60, true
+                    ).show()
+                }) {
+                    Icon(Icons.Filled.Schedule, contentDescription = null)
+                    Text(
+                        if (dueMinute >= 0)
+                            "  %02d:%02d".format(dueMinute / 60, dueMinute % 60)
+                        else "  Saat ekle"
+                    )
+                }
+                if (dueMinute >= 0) {
+                    TextButton(onClick = { dueMinute = -1 }) { Text("Kaldır") }
+                }
+            }
+
+            // ---- Öncelik ----
+            Spacer(Modifier.height(16.dp))
+            Text("Öncelik", style = MaterialTheme.typography.labelLarge)
+            Spacer(Modifier.height(8.dp))
+            Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                ChoiceChip("Düşük", priority == Priority.LOW) { priority = Priority.LOW }
+                ChoiceChip("Orta", priority == Priority.MEDIUM) { priority = Priority.MEDIUM }
+                ChoiceChip("Yüksek", priority == Priority.HIGH) { priority = Priority.HIGH }
+            }
+
+            // ---- Kategori ----
+            Spacer(Modifier.height(16.dp))
+            OutlinedTextField(
+                value = category,
+                onValueChange = { category = it },
+                label = { Text("Kategori / etiket (isteğe bağlı)") },
+                singleLine = true,
+                modifier = Modifier.fillMaxWidth()
+            )
+
+            // ---- Tekrar ----
+            Spacer(Modifier.height(16.dp))
+            Text("Tekrar", style = MaterialTheme.typography.labelLarge)
+            Spacer(Modifier.height(8.dp))
+            Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                ChoiceChip("Yok", repeat == RepeatRule.NONE) { repeat = RepeatRule.NONE }
+                ChoiceChip("Her gün", repeat == RepeatRule.DAILY) { repeat = RepeatRule.DAILY }
+                ChoiceChip("Hafta içi", repeat == RepeatRule.WEEKDAYS) { repeat = RepeatRule.WEEKDAYS }
+                ChoiceChip("Haftalık", repeat == RepeatRule.WEEKLY) { repeat = RepeatRule.WEEKLY }
+            }
+
+            // ---- Alt görevler ----
+            Spacer(Modifier.height(16.dp))
+            Text("Alt görevler", style = MaterialTheme.typography.labelLarge)
+            Spacer(Modifier.height(4.dp))
+            subtasks.forEachIndexed { index, sub ->
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    Checkbox(
+                        checked = sub.done,
+                        onCheckedChange = { subtasks[index] = sub.copy(done = it) }
+                    )
+                    Text(
+                        sub.title,
+                        modifier = Modifier.weight(1f),
+                        style = MaterialTheme.typography.bodyMedium,
+                        textDecoration = if (sub.done) TextDecoration.LineThrough else null
+                    )
+                    IconButton(onClick = { subtasks.removeAt(index) }) {
+                        Icon(Icons.Filled.Close, contentDescription = "Sil")
+                    }
+                }
+            }
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                OutlinedTextField(
+                    value = newSubtask,
+                    onValueChange = { newSubtask = it },
+                    label = { Text("Yeni alt görev") },
+                    singleLine = true,
+                    modifier = Modifier.weight(1f)
+                )
+                IconButton(onClick = {
+                    val t = newSubtask.trim()
+                    if (t.isNotEmpty()) {
+                        subtasks.add(SubTask(t))
+                        newSubtask = ""
+                    }
+                }) {
+                    Icon(Icons.Filled.Add, contentDescription = "Ekle")
+                }
+            }
+
+            // ---- Durum ----
             Spacer(Modifier.height(16.dp))
             Text("Durum", style = MaterialTheme.typography.labelLarge)
             Spacer(Modifier.height(8.dp))
             Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                StatusChip("Bekliyor", status == TaskStatus.WAITING) { status = TaskStatus.WAITING }
-                StatusChip("Devam", status == TaskStatus.IN_PROGRESS) { status = TaskStatus.IN_PROGRESS }
-                StatusChip("Yapıldı", status == TaskStatus.DONE) { status = TaskStatus.DONE }
+                ChoiceChip("Bekliyor", status == TaskStatus.WAITING) { status = TaskStatus.WAITING }
+                ChoiceChip("Devam", status == TaskStatus.IN_PROGRESS) { status = TaskStatus.IN_PROGRESS }
+                ChoiceChip("Yapıldı", status == TaskStatus.DONE) { status = TaskStatus.DONE }
             }
 
+            // ---- Fotoğraf ----
             Spacer(Modifier.height(16.dp))
             Text("Fotoğraf", style = MaterialTheme.typography.labelLarge)
             Spacer(Modifier.height(8.dp))
@@ -170,7 +298,12 @@ fun TaskEditorSheet(
 
             Spacer(Modifier.height(24.dp))
             Button(
-                onClick = { onSave(title, note, status, photoPath) },
+                onClick = {
+                    onSave(
+                        title, note, status, photoPath,
+                        dueMinute, priority, category, repeat, subtasks.toList()
+                    )
+                },
                 enabled = title.isNotBlank(),
                 modifier = Modifier
                     .fillMaxWidth()
@@ -184,6 +317,6 @@ fun TaskEditorSheet(
 }
 
 @Composable
-private fun StatusChip(label: String, selected: Boolean, onClick: () -> Unit) {
+private fun ChoiceChip(label: String, selected: Boolean, onClick: () -> Unit) {
     FilterChip(selected = selected, onClick = onClick, label = { Text(label) })
 }

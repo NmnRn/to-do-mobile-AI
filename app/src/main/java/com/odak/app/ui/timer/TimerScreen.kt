@@ -31,7 +31,7 @@ import com.odak.app.ui.components.ControlRow
 import com.odak.app.ui.components.PrimaryControl
 import com.odak.app.ui.components.SecondaryControl
 import com.odak.app.ui.components.Stepper
-import com.odak.app.util.Buzz
+import com.odak.app.util.Alert
 import com.odak.app.util.TimeFormat
 
 @OptIn(ExperimentalLayoutApi::class)
@@ -96,7 +96,11 @@ fun TimerScreen(vm: CountdownViewModel) {
             PrimaryControl(
                 label = if (vm.running) "Duraklat" else "Başlat",
                 icon = if (vm.running) Icons.Filled.Pause else Icons.Filled.PlayArrow,
-                onClick = { vm.toggle { Buzz.vibrate(context, 700) } }
+                onClick = {
+                    vm.toggle {
+                        Alert.fire(context, "Süre doldu", "Zamanlayıcı tamamlandı", id = 1001)
+                    }
+                }
             )
             SecondaryControl("Sıfırla", Icons.Filled.Refresh, onClick = { vm.reset() })
         }

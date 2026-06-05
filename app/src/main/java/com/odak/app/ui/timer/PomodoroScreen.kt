@@ -35,7 +35,7 @@ import com.odak.app.ui.components.ControlRow
 import com.odak.app.ui.components.PrimaryControl
 import com.odak.app.ui.components.SecondaryControl
 import com.odak.app.ui.components.Stepper
-import com.odak.app.util.Buzz
+import com.odak.app.util.Alert
 import com.odak.app.util.TimeFormat
 
 @Composable
@@ -45,7 +45,14 @@ fun PomodoroScreen(vm: PomodoroViewModel) {
     val ringColor =
         if (isWork) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.secondary
 
-    val onPhaseEnd: (PomoPhase) -> Unit = { Buzz.vibrate(context, 700) }
+    val onPhaseEnd: (PomoPhase) -> Unit = { next ->
+        val message = when (next) {
+            PomoPhase.WORK -> "Mola bitti — odak zamanı!"
+            PomoPhase.SHORT_BREAK -> "Odak tamamlandı — kısa mola!"
+            PomoPhase.LONG_BREAK -> "Odak tamamlandı — uzun mola!"
+        }
+        Alert.fire(context, "Pomodoro", message, id = 1002)
+    }
 
     Column(
         modifier = Modifier

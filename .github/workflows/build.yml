@@ -35,12 +35,13 @@ jobs:
       - name: Surface build errors on failure
         if: failure()
         run: |
-          tail -n 400 build.log > CI_BUILD_LOG.txt
-          git config user.email "ci@local"
-          git config user.name "CI"
-          git add -f CI_BUILD_LOG.txt
-          git commit -q -m "ci log ${{ github.run_id }}"
-          git push -f origin HEAD:ci-log
+          {
+            echo '### ❌ Derleme hatası'
+            echo
+            echo '```'
+            grep -E "^e: |^w: |FAILURE:|What went wrong|> Task .* FAILED" build.log | head -80 || tail -n 80 build.log
+            echo '```'
+          } >> "$GITHUB_STEP_SUMMARY"
 
       - name: Rename APK
         run: cp app/build/outputs/apk/release/app-release.apk Odak.apk

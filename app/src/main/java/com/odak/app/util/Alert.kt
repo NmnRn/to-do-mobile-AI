@@ -1,6 +1,7 @@
 package com.odak.app.util
 
 import android.Manifest
+import android.app.Notification
 import android.app.NotificationChannel
 import android.app.NotificationManager
 import android.content.Context
@@ -27,6 +28,9 @@ object Alert {
     const val REMINDER_CHANNEL_ID = "odak_reminders"
     const val ONGOING_CHANNEL_ID = "odak_ongoing"
 
+    /** Marks the intent fired from the finish alarm so the activity wakes the screen. */
+    const val EXTRA_FROM_ALARM = "com.odak.app.FROM_ALARM"
+
     fun ensureChannel(context: Context) {
         val manager = context.getSystemService(NotificationManager::class.java) ?: return
         ensureAlertChannel(manager)
@@ -50,6 +54,7 @@ object Alert {
             enableVibration(true)
             vibrationPattern = longArrayOf(0, 400, 200, 400)
             setSound(sound, attrs)
+            lockscreenVisibility = Notification.VISIBILITY_PUBLIC
         }
         manager.createNotificationChannel(channel)
     }
@@ -63,6 +68,7 @@ object Alert {
         ).apply {
             description = "Bekleyen görevler için düzenli hatırlatmalar"
             enableVibration(true)
+            lockscreenVisibility = Notification.VISIBILITY_PUBLIC
         }
         manager.createNotificationChannel(channel)
     }
@@ -78,6 +84,7 @@ object Alert {
             setShowBadge(false)
             setSound(null, null)
             enableVibration(false)
+            lockscreenVisibility = Notification.VISIBILITY_PUBLIC
         }
         manager.createNotificationChannel(channel)
     }
@@ -89,6 +96,21 @@ object Alert {
         }
         return PendingIntent.getActivity(
             context, 0, intent,
+            PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
+        )
+    }
+
+    /**
+     * Full-screen intent for the finish alarm: opens the app and signals it to
+     * turn the screen on / show over the lock screen, like an alarm clock.
+     */
+    private fun alarmFullScreenIntent(context: Context): PendingIntent {
+        val intent = Intent(context, MainActivity::class.java).apply {
+            flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TOP
+            putExtra(EXTRA_FROM_ALARM, true)
+        }
+        return PendingIntent.getActivity(
+            context, 1, intent,
             PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
         )
     }
@@ -107,6 +129,7 @@ object Alert {
             .setContentText(message)
             .setStyle(NotificationCompat.BigTextStyle().bigText(message))
             .setPriority(NotificationCompat.PRIORITY_DEFAULT)
+            .setVisibility(NotificationCompat.VISIBILITY_PUBLIC)
             .setContentIntent(openAppIntent(context))
             .setAutoCancel(true)
             .build()
@@ -132,7 +155,9 @@ object Alert {
             .setContentText(message)
             .setPriority(NotificationCompat.PRIORITY_HIGH)
             .setCategory(NotificationCompat.CATEGORY_ALARM)
+            .setVisibility(NotificationCompat.VISIBILITY_PUBLIC)
             .setContentIntent(openAppIntent(context))
+            .setFullScreenIntent(alarmFullScreenIntent(context), true)
             .setAutoCancel(true)
             .build()
         NotificationManagerCompat.from(context).notify(id, notification)

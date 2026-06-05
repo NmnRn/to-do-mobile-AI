@@ -1,5 +1,7 @@
 package com.odak.app.ui.settings
 
+import android.app.TimePickerDialog
+import android.content.Context
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -23,8 +25,10 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
@@ -72,7 +76,7 @@ fun SettingsScreen(themeVm: ThemeViewModel, updateVm: UpdateViewModel) {
                     color = MaterialTheme.colorScheme.onBackground
                 )
                 Text(
-                    "Bekleyen görevlerin için 3 saatte bir hatırlatma (gece sessiz)",
+                    "Bekleyen görevlerin için düzenli hatırlatma",
                     style = MaterialTheme.typography.bodySmall,
                     color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
@@ -85,6 +89,67 @@ fun SettingsScreen(themeVm: ThemeViewModel, updateVm: UpdateViewModel) {
                     Reminders.setEnabled(context, it)
                 }
             )
+        }
+
+        if (remindersOn) {
+            var interval by remember { mutableIntStateOf(Reminders.intervalHours(context)) }
+            var quietStart by remember { mutableIntStateOf(Reminders.quietStart(context)) }
+            var quietEnd by remember { mutableIntStateOf(Reminders.quietEnd(context)) }
+
+            Spacer(Modifier.height(16.dp))
+            Text(
+                "Sıklık",
+                style = MaterialTheme.typography.bodyMedium,
+                color = MaterialTheme.colorScheme.onBackground
+            )
+            Spacer(Modifier.height(8.dp))
+            Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                Reminders.INTERVAL_OPTIONS.forEach { hours ->
+                    FilterChip(
+                        selected = interval == hours,
+                        onClick = {
+                            interval = hours
+                            Reminders.setIntervalHours(context, hours)
+                        },
+                        label = { Text("$hours saat") }
+                    )
+                }
+            }
+
+            Spacer(Modifier.height(16.dp))
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.SpaceBetween
+            ) {
+                Column(Modifier.weight(1f)) {
+                    Text(
+                        "Sessiz saatler",
+                        style = MaterialTheme.typography.bodyLarge,
+                        color = MaterialTheme.colorScheme.onBackground
+                    )
+                    Text(
+                        "Bu aralıkta hatırlatma gönderilmez",
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
+                }
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    TextButton(onClick = {
+                        showHourPicker(context, quietStart) { h ->
+                            quietStart = h
+                            Reminders.setQuietHours(context, h, quietEnd)
+                        }
+                    }) { Text(hourLabel(quietStart)) }
+                    Text("–", color = MaterialTheme.colorScheme.onSurfaceVariant)
+                    TextButton(onClick = {
+                        showHourPicker(context, quietEnd) { h ->
+                            quietEnd = h
+                            Reminders.setQuietHours(context, quietStart, h)
+                        }
+                    }) { Text(hourLabel(quietEnd)) }
+                }
+            }
         }
 
         Spacer(Modifier.height(20.dp))
@@ -159,6 +224,16 @@ fun SettingsScreen(themeVm: ThemeViewModel, updateVm: UpdateViewModel) {
             color = MaterialTheme.colorScheme.onSurfaceVariant
         )
     }
+}
+
+private fun hourLabel(hour: Int): String = "%02d:00".format(hour)
+
+private fun showHourPicker(context: Context, current: Int, onPick: (Int) -> Unit) {
+    TimePickerDialog(
+        context,
+        { _, hourOfDay, _ -> onPick(hourOfDay) },
+        current, 0, true
+    ).show()
 }
 
 @Composable

@@ -34,17 +34,13 @@ jobs:
 
       - name: Surface build errors on failure
         if: failure()
-        env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          {
-            echo '### Otomatik derleme hata logu'
-            echo
-            echo '```'
-            tail -n 250 build.log
-            echo '```'
-          } > issue_body.md
-          gh issue create --title "CI build log ${{ github.run_id }}" --body-file issue_body.md || true
+          tail -n 400 build.log > CI_BUILD_LOG.txt
+          git config user.email "ci@local"
+          git config user.name "CI"
+          git add -f CI_BUILD_LOG.txt
+          git commit -q -m "ci log ${{ github.run_id }}"
+          git push -f origin HEAD:ci-log
 
       - name: Rename APK
         run: cp app/build/outputs/apk/release/app-release.apk Odak.apk

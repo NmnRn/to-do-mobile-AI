@@ -16,13 +16,9 @@ class ThemeViewModel(app: Application) : AndroidViewModel(app) {
     var mode by mutableStateOf(read())
         private set
 
-    fun cycle() {
-        mode = when (mode) {
-            ThemeMode.SYSTEM -> ThemeMode.LIGHT
-            ThemeMode.LIGHT -> ThemeMode.DARK
-            ThemeMode.DARK -> ThemeMode.SYSTEM
-        }
-        prefs.edit().putString(KEY, mode.name).apply()
+    fun set(newMode: ThemeMode) {
+        mode = newMode
+        prefs.edit().putString(KEY, newMode.name).apply()
     }
 
     private fun read(): ThemeMode = runCatching {

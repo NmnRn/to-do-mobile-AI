@@ -4,10 +4,9 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.BrightnessAuto
-import androidx.compose.material.icons.filled.DarkMode
+import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.HourglassEmpty
-import androidx.compose.material.icons.filled.LightMode
+import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material.icons.filled.Spa
 import androidx.compose.material.icons.filled.TaskAlt
 import androidx.compose.material.icons.filled.Timer
@@ -24,14 +23,16 @@ import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.lifecycle.viewmodel.compose.viewModel
+import com.odak.app.ui.settings.SettingsScreen
+import com.odak.app.ui.settings.UpdateViewModel
 import com.odak.app.ui.tasks.TaskViewModel
 import com.odak.app.ui.tasks.TasksScreen
-import com.odak.app.ui.theme.ThemeMode
 import com.odak.app.ui.theme.ThemeViewModel
 import com.odak.app.ui.timer.CountdownViewModel
 import com.odak.app.ui.timer.PomodoroScreen
@@ -54,30 +55,37 @@ fun MainScreen(themeVm: ThemeViewModel) {
         )
     }
     var selected by remember { mutableIntStateOf(0) }
+    var showSettings by remember { mutableStateOf(false) }
 
     // Hoisted here so timers keep running while switching tabs.
     val taskVm: TaskViewModel = viewModel()
     val stopwatchVm: StopwatchViewModel = viewModel()
     val countdownVm: CountdownViewModel = viewModel()
     val pomodoroVm: PomodoroViewModel = viewModel()
+    val updateVm: UpdateViewModel = viewModel()
 
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text(tabs[selected].label) },
-                actions = {
-                    IconButton(onClick = { themeVm.cycle() }) {
-                        val (icon, desc) = when (themeVm.mode) {
-                            ThemeMode.SYSTEM -> Icons.Filled.BrightnessAuto to "Tema: Sistem"
-                            ThemeMode.LIGHT -> Icons.Filled.LightMode to "Tema: Aydınlık"
-                            ThemeMode.DARK -> Icons.Filled.DarkMode to "Tema: Karanlık"
+                title = { Text(if (showSettings) "Ayarlar" else tabs[selected].label) },
+                navigationIcon = {
+                    if (showSettings) {
+                        IconButton(onClick = { showSettings = false }) {
+                            Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Geri")
                         }
-                        Icon(icon, contentDescription = desc)
+                    }
+                },
+                actions = {
+                    if (!showSettings) {
+                        IconButton(onClick = { showSettings = true }) {
+                            Icon(Icons.Filled.Settings, contentDescription = "Ayarlar")
+                        }
                     }
                 },
                 colors = TopAppBarDefaults.topAppBarColors(
                     containerColor = MaterialTheme.colorScheme.background,
                     titleContentColor = MaterialTheme.colorScheme.onBackground,
+                    navigationIconContentColor = MaterialTheme.colorScheme.onBackground,
                     actionIconContentColor = MaterialTheme.colorScheme.primary
                 )
             )
@@ -86,8 +94,8 @@ fun MainScreen(themeVm: ThemeViewModel) {
             NavigationBar {
                 tabs.forEachIndexed { index, tab ->
                     NavigationBarItem(
-                        selected = selected == index,
-                        onClick = { selected = index },
+                        selected = selected == index && !showSettings,
+                        onClick = { selected = index; showSettings = false },
                         icon = { Icon(tab.icon, contentDescription = tab.label) },
                         label = { Text(tab.label) }
                     )
@@ -100,11 +108,15 @@ fun MainScreen(themeVm: ThemeViewModel) {
                 .fillMaxSize()
                 .padding(padding)
         ) {
-            when (selected) {
-                0 -> TasksScreen(taskVm)
-                1 -> StopwatchScreen(stopwatchVm)
-                2 -> TimerScreen(countdownVm)
-                else -> PomodoroScreen(pomodoroVm)
+            if (showSettings) {
+                SettingsScreen(themeVm, updateVm)
+            } else {
+                when (selected) {
+                    0 -> TasksScreen(taskVm)
+                    1 -> StopwatchScreen(stopwatchVm)
+                    2 -> TimerScreen(countdownVm)
+                    else -> PomodoroScreen(pomodoroVm)
+                }
             }
         }
     }

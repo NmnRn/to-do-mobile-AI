@@ -13,7 +13,8 @@ Android uygulaması.
 - ⏳ **Zamanlayıcı** — hazır süre seçenekleri + geri sayım, bitince titreşim
 - 🍅 **Pomodoro** — 25/5/15 dakikalık odak & mola döngüleri, seans takibi
 - 💾 **Yerel veritabanı** — tüm veriler Room ile cihazda saklanır
-- 🎨 **Sakinleştirici tasarım** — yumuşak renkler, açık/koyu tema desteği
+- 🎨 **Sakinleştirici tasarım** — yumuşak renkler, Sistem/Aydınlık/Karanlık tema
+- 🔄 **Uygulama içi güncelleme** — Ayarlar'dan son commit'e göre kontrol et, indir & kur
 
 ## 📲 İndir & Kur
 
@@ -27,8 +28,14 @@ Kurulum:
 2. Açtığında "Bilinmeyen kaynaklardan yüklemeye izin ver" çıkarsa onayla.
 3. Kur ve aç. 🎉
 
-> Not: APK debug anahtarıyla imzalanır; yeni sürüme geçerken bazen eski sürümü
-> kaldırman gerekebilir.
+Sonraki güncellemeler **uygulama içinden** yapılır: **Ayarlar → Güncellemeleri
+kontrol et → İndir ve kur**. Uygulama, kurulu sürümün commit'i ile depodaki son
+commit'i karşılaştırır; fark varsa en güncel APK'yı indirip kurar.
+
+> Tek seferlik not: Bu sürüm artık **sabit bir imza anahtarıyla** imzalanıyor.
+> Daha önce eski bir Odak kurduysan, bu yeni sürümü kurmadan önce eskisini bir
+> kez kaldırman gerekebilir (imza değişikliği). Sonrasında güncellemeler sorunsuz
+> üstüne kurulur.
 
 ## 🛠️ Teknolojiler
 

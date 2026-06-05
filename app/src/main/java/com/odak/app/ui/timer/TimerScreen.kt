@@ -2,6 +2,7 @@ package com.odak.app.ui.timer
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.ExperimentalLayoutApi
 import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
@@ -30,6 +31,7 @@ import com.odak.app.ui.components.SecondaryControl
 import com.odak.app.util.Buzz
 import com.odak.app.util.TimeFormat
 
+@OptIn(ExperimentalLayoutApi::class)
 @Composable
 fun TimerScreen(vm: CountdownViewModel) {
     val context = LocalContext.current

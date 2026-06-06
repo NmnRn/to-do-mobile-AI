@@ -2,6 +2,7 @@ package com.odak.app
 
 import android.app.Application
 import com.odak.app.data.AppDatabase
+import com.odak.app.data.PlanRepository
 import com.odak.app.data.TaskRepository
 import com.odak.app.reminder.Reminders
 import com.odak.app.task.TaskAlarms
@@ -14,6 +15,7 @@ import kotlinx.coroutines.launch
 
 class OdakApp : Application() {
     val repository: TaskRepository by lazy { TaskRepository(AppDatabase.get(this).taskDao()) }
+    val planRepository: PlanRepository by lazy { PlanRepository(AppDatabase.get(this).planDao()) }
 
     private val appScope = CoroutineScope(SupervisorJob() + Dispatchers.IO)
 

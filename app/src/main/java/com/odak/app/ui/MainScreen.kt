@@ -5,6 +5,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material.icons.filled.CalendarMonth
 import androidx.compose.material.icons.filled.HourglassEmpty
 import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material.icons.filled.Spa
@@ -29,6 +30,8 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.lifecycle.viewmodel.compose.viewModel
+import com.odak.app.ui.plan.PlanScreen
+import com.odak.app.ui.plan.PlanViewModel
 import com.odak.app.ui.settings.SettingsScreen
 import com.odak.app.ui.settings.UpdateViewModel
 import com.odak.app.ui.tasks.TaskViewModel
@@ -49,6 +52,7 @@ fun MainScreen(themeVm: ThemeViewModel) {
     val tabs = remember {
         listOf(
             Tab("Görevler", Icons.Filled.TaskAlt),
+            Tab("Plan", Icons.Filled.CalendarMonth),
             Tab("Kronometre", Icons.Filled.Timer),
             Tab("Zamanlayıcı", Icons.Filled.HourglassEmpty),
             Tab("Pomodoro", Icons.Filled.Spa)
@@ -59,6 +63,7 @@ fun MainScreen(themeVm: ThemeViewModel) {
 
     // Hoisted here so timers keep running while switching tabs.
     val taskVm: TaskViewModel = viewModel()
+    val planVm: PlanViewModel = viewModel()
     val stopwatchVm: StopwatchViewModel = viewModel()
     val countdownVm: CountdownViewModel = viewModel()
     val pomodoroVm: PomodoroViewModel = viewModel()
@@ -113,8 +118,9 @@ fun MainScreen(themeVm: ThemeViewModel) {
             } else {
                 when (selected) {
                     0 -> TasksScreen(taskVm)
-                    1 -> StopwatchScreen(stopwatchVm)
-                    2 -> TimerScreen(countdownVm)
+                    1 -> PlanScreen(planVm)
+                    2 -> StopwatchScreen(stopwatchVm)
+                    3 -> TimerScreen(countdownVm)
                     else -> PomodoroScreen(pomodoroVm)
                 }
             }

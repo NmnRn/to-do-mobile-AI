@@ -49,10 +49,12 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.unit.dp
 import coil.compose.AsyncImage
+import com.odak.app.R
 import com.odak.app.data.Priority
 import com.odak.app.data.RepeatRule
 import com.odak.app.data.SubTask
@@ -118,7 +120,7 @@ fun TaskEditorSheet(
                 .padding(bottom = 32.dp)
         ) {
             Text(
-                text = if (existing == null) "Yeni Görev" else "Görevi Düzenle",
+                text = stringResource(if (existing == null) R.string.new_task else R.string.edit_task),
                 style = MaterialTheme.typography.titleLarge
             )
             Spacer(Modifier.height(16.dp))
@@ -126,7 +128,7 @@ fun TaskEditorSheet(
             OutlinedTextField(
                 value = title,
                 onValueChange = { title = it },
-                label = { Text("Görev başlığı") },
+                label = { Text(stringResource(R.string.task_title)) },
                 singleLine = true,
                 modifier = Modifier.fillMaxWidth()
             )
@@ -134,14 +136,14 @@ fun TaskEditorSheet(
             OutlinedTextField(
                 value = note,
                 onValueChange = { note = it },
-                label = { Text("Not (isteğe bağlı)") },
+                label = { Text(stringResource(R.string.note_optional)) },
                 modifier = Modifier.fillMaxWidth(),
                 minLines = 2
             )
 
             // ---- Saat ----
             Spacer(Modifier.height(16.dp))
-            Text("Hatırlatma saati", style = MaterialTheme.typography.labelLarge)
+            Text(stringResource(R.string.reminder_time), style = MaterialTheme.typography.labelLarge)
             Spacer(Modifier.height(8.dp))
             Row(verticalAlignment = Alignment.CenterVertically) {
                 OutlinedButton(onClick = {
@@ -156,22 +158,22 @@ fun TaskEditorSheet(
                     Text(
                         if (dueMinute >= 0)
                             "  %02d:%02d".format(dueMinute / 60, dueMinute % 60)
-                        else "  Saat ekle"
+                        else "  " + stringResource(R.string.add_time)
                     )
                 }
                 if (dueMinute >= 0) {
-                    TextButton(onClick = { dueMinute = -1 }) { Text("Kaldır") }
+                    TextButton(onClick = { dueMinute = -1 }) { Text(stringResource(R.string.remove)) }
                 }
             }
 
             // ---- Öncelik ----
             Spacer(Modifier.height(16.dp))
-            Text("Öncelik", style = MaterialTheme.typography.labelLarge)
+            Text(stringResource(R.string.priority), style = MaterialTheme.typography.labelLarge)
             Spacer(Modifier.height(8.dp))
             Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                ChoiceChip("Düşük", priority == Priority.LOW) { priority = Priority.LOW }
-                ChoiceChip("Orta", priority == Priority.MEDIUM) { priority = Priority.MEDIUM }
-                ChoiceChip("Yüksek", priority == Priority.HIGH) { priority = Priority.HIGH }
+                ChoiceChip(stringResource(R.string.prio_low), priority == Priority.LOW) { priority = Priority.LOW }
+                ChoiceChip(stringResource(R.string.prio_medium), priority == Priority.MEDIUM) { priority = Priority.MEDIUM }
+                ChoiceChip(stringResource(R.string.prio_high), priority == Priority.HIGH) { priority = Priority.HIGH }
             }
 
             // ---- Kategori ----
@@ -179,25 +181,25 @@ fun TaskEditorSheet(
             OutlinedTextField(
                 value = category,
                 onValueChange = { category = it },
-                label = { Text("Kategori / etiket (isteğe bağlı)") },
+                label = { Text(stringResource(R.string.category_label)) },
                 singleLine = true,
                 modifier = Modifier.fillMaxWidth()
             )
 
             // ---- Tekrar ----
             Spacer(Modifier.height(16.dp))
-            Text("Tekrar", style = MaterialTheme.typography.labelLarge)
+            Text(stringResource(R.string.repeat), style = MaterialTheme.typography.labelLarge)
             Spacer(Modifier.height(8.dp))
             Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                ChoiceChip("Yok", repeat == RepeatRule.NONE) { repeat = RepeatRule.NONE }
-                ChoiceChip("Her gün", repeat == RepeatRule.DAILY) { repeat = RepeatRule.DAILY }
-                ChoiceChip("Hafta içi", repeat == RepeatRule.WEEKDAYS) { repeat = RepeatRule.WEEKDAYS }
-                ChoiceChip("Haftalık", repeat == RepeatRule.WEEKLY) { repeat = RepeatRule.WEEKLY }
+                ChoiceChip(stringResource(R.string.repeat_none), repeat == RepeatRule.NONE) { repeat = RepeatRule.NONE }
+                ChoiceChip(stringResource(R.string.repeat_daily), repeat == RepeatRule.DAILY) { repeat = RepeatRule.DAILY }
+                ChoiceChip(stringResource(R.string.repeat_weekdays), repeat == RepeatRule.WEEKDAYS) { repeat = RepeatRule.WEEKDAYS }
+                ChoiceChip(stringResource(R.string.repeat_weekly), repeat == RepeatRule.WEEKLY) { repeat = RepeatRule.WEEKLY }
             }
 
             // ---- Alt görevler ----
             Spacer(Modifier.height(16.dp))
-            Text("Alt görevler", style = MaterialTheme.typography.labelLarge)
+            Text(stringResource(R.string.subtasks), style = MaterialTheme.typography.labelLarge)
             Spacer(Modifier.height(4.dp))
             subtasks.forEachIndexed { index, sub ->
                 Row(verticalAlignment = Alignment.CenterVertically) {
@@ -212,7 +214,7 @@ fun TaskEditorSheet(
                         textDecoration = if (sub.done) TextDecoration.LineThrough else null
                     )
                     IconButton(onClick = { subtasks.removeAt(index) }) {
-                        Icon(Icons.Filled.Close, contentDescription = "Sil")
+                        Icon(Icons.Filled.Close, contentDescription = stringResource(R.string.delete))
                     }
                 }
             }
@@ -220,7 +222,7 @@ fun TaskEditorSheet(
                 OutlinedTextField(
                     value = newSubtask,
                     onValueChange = { newSubtask = it },
-                    label = { Text("Yeni alt görev") },
+                    label = { Text(stringResource(R.string.new_subtask)) },
                     singleLine = true,
                     modifier = Modifier.weight(1f)
                 )
@@ -231,23 +233,23 @@ fun TaskEditorSheet(
                         newSubtask = ""
                     }
                 }) {
-                    Icon(Icons.Filled.Add, contentDescription = "Ekle")
+                    Icon(Icons.Filled.Add, contentDescription = stringResource(R.string.add))
                 }
             }
 
             // ---- Durum ----
             Spacer(Modifier.height(16.dp))
-            Text("Durum", style = MaterialTheme.typography.labelLarge)
+            Text(stringResource(R.string.status), style = MaterialTheme.typography.labelLarge)
             Spacer(Modifier.height(8.dp))
             Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                ChoiceChip("Bekliyor", status == TaskStatus.WAITING) { status = TaskStatus.WAITING }
-                ChoiceChip("Devam", status == TaskStatus.IN_PROGRESS) { status = TaskStatus.IN_PROGRESS }
-                ChoiceChip("Yapıldı", status == TaskStatus.DONE) { status = TaskStatus.DONE }
+                ChoiceChip(stringResource(R.string.status_waiting), status == TaskStatus.WAITING) { status = TaskStatus.WAITING }
+                ChoiceChip(stringResource(R.string.status_in_progress), status == TaskStatus.IN_PROGRESS) { status = TaskStatus.IN_PROGRESS }
+                ChoiceChip(stringResource(R.string.status_done), status == TaskStatus.DONE) { status = TaskStatus.DONE }
             }
 
             // ---- Fotoğraf ----
             Spacer(Modifier.height(16.dp))
-            Text("Fotoğraf", style = MaterialTheme.typography.labelLarge)
+            Text(stringResource(R.string.photo), style = MaterialTheme.typography.labelLarge)
             Spacer(Modifier.height(8.dp))
 
             if (photoPath != null) {
@@ -260,14 +262,14 @@ fun TaskEditorSheet(
                 ) {
                     AsyncImage(
                         model = File(photoPath!!),
-                        contentDescription = "Görev fotoğrafı",
+                        contentDescription = stringResource(R.string.task_photo),
                         contentScale = ContentScale.Crop,
                         modifier = Modifier.fillMaxWidth()
                     )
                 }
                 TextButton(onClick = { photoPath = null }) {
                     Icon(Icons.Filled.Delete, contentDescription = null)
-                    Text("  Fotoğrafı kaldır")
+                    Text("  " + stringResource(R.string.remove_photo))
                 }
             }
 
@@ -281,7 +283,7 @@ fun TaskEditorSheet(
                     modifier = Modifier.weight(1f)
                 ) {
                     Icon(Icons.Filled.PhotoLibrary, contentDescription = null)
-                    Text("  Galeri")
+                    Text("  " + stringResource(R.string.gallery))
                 }
                 OutlinedButton(
                     onClick = {
@@ -292,7 +294,7 @@ fun TaskEditorSheet(
                     modifier = Modifier.weight(1f)
                 ) {
                     Icon(Icons.Filled.PhotoCamera, contentDescription = null)
-                    Text("  Kamera")
+                    Text("  " + stringResource(R.string.camera))
                 }
             }
 
@@ -310,7 +312,7 @@ fun TaskEditorSheet(
                     .height(52.dp)
             ) {
                 Icon(Icons.Filled.Check, contentDescription = null)
-                Text("  Kaydet", fontWeight = FontWeight.SemiBold)
+                Text("  " + stringResource(R.string.save), fontWeight = FontWeight.SemiBold)
             }
         }
     }

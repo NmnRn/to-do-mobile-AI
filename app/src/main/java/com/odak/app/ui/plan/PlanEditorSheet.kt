@@ -31,8 +31,10 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import com.odak.app.R
 import com.odak.app.data.PlanBlock
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -67,12 +69,12 @@ fun PlanEditorSheet(
                 .padding(bottom = 32.dp)
         ) {
             Text(
-                text = if (existing == null) "Yeni Plan" else "Planı Düzenle",
+                text = stringResource(if (existing == null) R.string.new_plan else R.string.edit_plan),
                 style = MaterialTheme.typography.titleLarge
             )
             Spacer(Modifier.height(16.dp))
 
-            Text("Saat aralığı", style = MaterialTheme.typography.labelLarge)
+            Text(stringResource(R.string.time_range), style = MaterialTheme.typography.labelLarge)
             Spacer(Modifier.height(8.dp))
             Row(
                 horizontalArrangement = Arrangement.spacedBy(12.dp),
@@ -101,8 +103,10 @@ fun PlanEditorSheet(
                 }
             }
             Spacer(Modifier.height(4.dp))
+            val mins = end - start
             Text(
-                durationLabel(end - start),
+                if (mins <= 0) stringResource(R.string.dur_invalid)
+                else stringResource(R.string.duration) + ": " + durationText(mins),
                 style = MaterialTheme.typography.labelMedium,
                 color = MaterialTheme.colorScheme.onSurfaceVariant
             )
@@ -111,7 +115,7 @@ fun PlanEditorSheet(
             OutlinedTextField(
                 value = title,
                 onValueChange = { title = it },
-                label = { Text("Ne yapılacak?") },
+                label = { Text(stringResource(R.string.plan_what)) },
                 singleLine = true,
                 modifier = Modifier.fillMaxWidth()
             )
@@ -119,7 +123,7 @@ fun PlanEditorSheet(
             OutlinedTextField(
                 value = note,
                 onValueChange = { note = it },
-                label = { Text("Not (isteğe bağlı)") },
+                label = { Text(stringResource(R.string.note_optional)) },
                 modifier = Modifier.fillMaxWidth(),
                 minLines = 2
             )
@@ -133,19 +137,19 @@ fun PlanEditorSheet(
                     .height(52.dp)
             ) {
                 Icon(Icons.Filled.Check, contentDescription = null)
-                Text("  Kaydet", fontWeight = FontWeight.SemiBold)
+                Text("  " + stringResource(R.string.save), fontWeight = FontWeight.SemiBold)
             }
         }
     }
 }
 
-private fun durationLabel(minutes: Int): String {
-    if (minutes <= 0) return "Bitiş, başlangıçtan sonra olmalı"
+@Composable
+private fun durationText(minutes: Int): String {
     val h = minutes / 60
     val m = minutes % 60
     return when {
-        h > 0 && m > 0 -> "Süre: $h sa $m dk"
-        h > 0 -> "Süre: $h sa"
-        else -> "Süre: $m dk"
+        h > 0 && m > 0 -> stringResource(R.string.dur_h_m, h, m)
+        h > 0 -> stringResource(R.string.dur_h, h)
+        else -> stringResource(R.string.dur_m, m)
     }
 }

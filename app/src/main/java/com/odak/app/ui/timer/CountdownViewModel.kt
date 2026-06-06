@@ -7,6 +7,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
+import com.odak.app.R
 import com.odak.app.timer.TimerService
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
@@ -51,13 +52,14 @@ class CountdownViewModel(app: Application) : AndroidViewModel(app) {
         if (running || remaining <= 0) return
         running = true
         endAt = SystemClock.elapsedRealtime() + remaining
+        val ctx = getApplication<Application>()
         TimerService.startCountdown(
-            getApplication<Application>(),
+            ctx,
             TimerService.KEY_COUNTDOWN,
             endAt,
-            title = "Zamanlayıcı",
-            finishTitle = "Süre doldu",
-            finishMessage = "Zamanlayıcı tamamlandı",
+            title = ctx.getString(R.string.timer_default_title),
+            finishTitle = ctx.getString(R.string.time_up),
+            finishMessage = ctx.getString(R.string.countdown_done),
             finishAlertId = 1001
         )
         job = viewModelScope.launch {

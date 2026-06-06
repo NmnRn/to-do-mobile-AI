@@ -25,10 +25,12 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.odak.app.R
 import com.odak.app.ui.components.CircularTimer
 import com.odak.app.ui.components.ControlRow
 import com.odak.app.ui.components.PrimaryControl
@@ -55,7 +57,7 @@ fun PomodoroScreen(vm: PomodoroViewModel) {
     ) {
         Spacer(Modifier.height(8.dp))
         Text(
-            vm.phase.label,
+            stringResource(vm.phase.labelRes()),
             style = MaterialTheme.typography.titleMedium,
             color = ringColor
         )
@@ -92,7 +94,7 @@ fun PomodoroScreen(vm: PomodoroViewModel) {
 
         Spacer(Modifier.height(12.dp))
         Text(
-            "Tamamlanan: ${vm.completedSessions} seans",
+            stringResource(R.string.completed_sessions, vm.completedSessions),
             style = MaterialTheme.typography.bodyMedium,
             color = MaterialTheme.colorScheme.onSurfaceVariant
         )
@@ -100,27 +102,27 @@ fun PomodoroScreen(vm: PomodoroViewModel) {
         Spacer(Modifier.height(24.dp))
         ControlRow {
             PrimaryControl(
-                label = if (vm.running) "Duraklat" else "Başlat",
+                label = stringResource(if (vm.running) R.string.pause else R.string.start),
                 icon = if (vm.running) Icons.Filled.Pause else Icons.Filled.PlayArrow,
                 onClick = { vm.toggle(onPhaseEnd) }
             )
-            SecondaryControl("Atla", Icons.Filled.SkipNext, onClick = { vm.skip(onPhaseEnd) })
+            SecondaryControl(stringResource(R.string.skip), Icons.Filled.SkipNext, onClick = { vm.skip(onPhaseEnd) })
         }
         Spacer(Modifier.height(12.dp))
-        SecondaryControl("Sıfırla", Icons.Filled.Refresh, onClick = { vm.resetAll() })
+        SecondaryControl(stringResource(R.string.reset), Icons.Filled.Refresh, onClick = { vm.resetAll() })
 
         if (!vm.running) {
             Spacer(Modifier.height(24.dp))
             Text(
-                "Süreler (dakika)",
+                stringResource(R.string.durations_minutes),
                 style = MaterialTheme.typography.labelLarge,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
                 modifier = Modifier.fillMaxWidth()
             )
             Spacer(Modifier.height(4.dp))
-            Stepper("Odak", "${vm.workMin}", { vm.changeWork(-1) }, { vm.changeWork(1) })
-            Stepper("Kısa mola", "${vm.shortMin}", { vm.changeShort(-1) }, { vm.changeShort(1) })
-            Stepper("Uzun mola", "${vm.longMin}", { vm.changeLong(-1) }, { vm.changeLong(1) })
+            Stepper(stringResource(R.string.pomo_focus), "${vm.workMin}", { vm.changeWork(-1) }, { vm.changeWork(1) })
+            Stepper(stringResource(R.string.pomo_short_break), "${vm.shortMin}", { vm.changeShort(-1) }, { vm.changeShort(1) })
+            Stepper(stringResource(R.string.pomo_long_break), "${vm.longMin}", { vm.changeLong(-1) }, { vm.changeLong(1) })
         }
     }
 }

@@ -14,10 +14,12 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
+import com.odak.app.R
 
 /** A labelled "− value +" row for adjusting a numeric value by hand. */
 @Composable
@@ -40,7 +42,7 @@ fun Stepper(
             modifier = Modifier.weight(1f)
         )
         FilledTonalIconButton(onClick = onMinus) {
-            Icon(Icons.Filled.Remove, contentDescription = "Azalt")
+            Icon(Icons.Filled.Remove, contentDescription = stringResource(R.string.decrease))
         }
         Text(
             text = value,
@@ -51,7 +53,7 @@ fun Stepper(
             modifier = Modifier.width(56.dp)
         )
         FilledTonalIconButton(onClick = onPlus) {
-            Icon(Icons.Filled.Add, contentDescription = "Artır")
+            Icon(Icons.Filled.Add, contentDescription = stringResource(R.string.increase))
         }
     }
 }

@@ -2,21 +2,26 @@ package com.odak.app.ui.timer
 
 import android.app.Application
 import android.os.SystemClock
+import androidx.annotation.StringRes
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
+import com.odak.app.R
 import com.odak.app.timer.TimerService
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
 
-enum class PomoPhase(val label: String) {
-    WORK("Odak Zamanı"),
-    SHORT_BREAK("Kısa Mola"),
-    LONG_BREAK("Uzun Mola")
+enum class PomoPhase { WORK, SHORT_BREAK, LONG_BREAK }
+
+@StringRes
+fun PomoPhase.labelRes(): Int = when (this) {
+    PomoPhase.WORK -> R.string.phase_work
+    PomoPhase.SHORT_BREAK -> R.string.phase_short_break
+    PomoPhase.LONG_BREAK -> R.string.phase_long_break
 }
 
 class PomodoroViewModel(app: Application) : AndroidViewModel(app) {
@@ -72,12 +77,13 @@ class PomodoroViewModel(app: Application) : AndroidViewModel(app) {
         if (running || remaining <= 0) return
         running = true
         endAt = SystemClock.elapsedRealtime() + remaining
+        val ctx = getApplication<Application>()
         TimerService.startCountdown(
-            getApplication<Application>(),
+            ctx,
             TimerService.KEY_POMODORO,
             endAt,
-            title = "Pomodoro · ${phase.label}",
-            finishTitle = "Pomodoro",
+            title = ctx.getString(R.string.pomodoro_phase_title, ctx.getString(phase.labelRes())),
+            finishTitle = ctx.getString(R.string.pomodoro),
             finishMessage = messageFor(nextPhasePreview()),
             finishAlertId = 1002
         )
@@ -101,10 +107,13 @@ class PomodoroViewModel(app: Application) : AndroidViewModel(app) {
         PomoPhase.WORK
     }
 
-    private fun messageFor(next: PomoPhase): String = when (next) {
-        PomoPhase.WORK -> "Mola bitti — odak zamanı!"
-        PomoPhase.SHORT_BREAK -> "Odak tamamlandı — kısa mola!"
-        PomoPhase.LONG_BREAK -> "Odak tamamlandı — uzun mola!"
+    private fun messageFor(next: PomoPhase): String {
+        val ctx = getApplication<Application>()
+        return when (next) {
+            PomoPhase.WORK -> ctx.getString(R.string.pomo_msg_focus)
+            PomoPhase.SHORT_BREAK -> ctx.getString(R.string.pomo_msg_short)
+            PomoPhase.LONG_BREAK -> ctx.getString(R.string.pomo_msg_long)
+        }
     }
 
     private fun advancePhase(onPhaseEnd: (PomoPhase) -> Unit) {

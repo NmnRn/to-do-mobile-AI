@@ -42,10 +42,13 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
+import com.odak.app.R
 import com.odak.app.data.PlanBlock
 import com.odak.app.util.DateUtils
 import java.util.Calendar
@@ -59,11 +62,12 @@ fun PlanScreen(vm: PlanViewModel) {
     val isToday = vm.selectedDay == DateUtils.today()
     val nowMinute = if (isToday) currentMinuteOfDay() else -1
     val plannedMinutes = blocks.sumOf { it.durationMinutes }
+    val context = LocalContext.current
 
     Box(modifier = Modifier.fillMaxSize()) {
         Column(modifier = Modifier.fillMaxSize()) {
             PlanHeader(
-                dayLabel = DateUtils.label(vm.selectedDay),
+                dayLabel = DateUtils.label(context, vm.selectedDay),
                 fullDate = DateUtils.fullDate(vm.selectedDay),
                 count = blocks.size,
                 plannedMinutes = plannedMinutes,
@@ -102,7 +106,7 @@ fun PlanScreen(vm: PlanViewModel) {
             containerColor = MaterialTheme.colorScheme.primary,
             contentColor = MaterialTheme.colorScheme.onPrimary
         ) {
-            Icon(Icons.Filled.Add, contentDescription = "Plan ekle")
+            Icon(Icons.Filled.Add, contentDescription = stringResource(R.string.plan_add))
         }
     }
 
@@ -139,19 +143,19 @@ private fun PlanHeader(
                 )
             }
             IconButton(onClick = onPrev) {
-                Icon(Icons.Filled.ChevronLeft, contentDescription = "Önceki gün")
+                Icon(Icons.Filled.ChevronLeft, contentDescription = stringResource(R.string.prev_day))
             }
             IconButton(onClick = onToday) {
-                Icon(Icons.Filled.Today, contentDescription = "Bugün")
+                Icon(Icons.Filled.Today, contentDescription = stringResource(R.string.day_today))
             }
             IconButton(onClick = onNext) {
-                Icon(Icons.Filled.ChevronRight, contentDescription = "Sonraki gün")
+                Icon(Icons.Filled.ChevronRight, contentDescription = stringResource(R.string.next_day))
             }
         }
         if (count > 0) {
             Spacer(Modifier.height(8.dp))
             Text(
-                "$count blok • toplam ${hourLabel(plannedMinutes)}",
+                stringResource(R.string.plan_summary, count, durationText(plannedMinutes)),
                 style = MaterialTheme.typography.labelLarge,
                 color = MaterialTheme.colorScheme.onSurfaceVariant
             )
@@ -208,7 +212,7 @@ private fun PlanCard(
                 Row(verticalAlignment = Alignment.CenterVertically) {
                     if (ongoing) {
                         Text(
-                            "ŞİMDİ  ",
+                            stringResource(R.string.now) + "  ",
                             style = MaterialTheme.typography.labelSmall,
                             fontWeight = FontWeight.Bold,
                             color = MaterialTheme.colorScheme.primary
@@ -235,7 +239,7 @@ private fun PlanCard(
                 }
                 Spacer(Modifier.size(4.dp))
                 Text(
-                    hourLabel(block.durationMinutes),
+                    durationText(block.durationMinutes),
                     style = MaterialTheme.typography.labelMedium,
                     color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
@@ -244,7 +248,7 @@ private fun PlanCard(
             IconButton(onClick = onDelete) {
                 Icon(
                     Icons.Filled.Close,
-                    contentDescription = "Sil",
+                    contentDescription = stringResource(R.string.delete),
                     tint = MaterialTheme.colorScheme.onSurfaceVariant
                 )
             }
@@ -267,7 +271,7 @@ private fun DoneButton(done: Boolean, onClick: () -> Unit) {
         if (done) {
             Icon(
                 Icons.Filled.Check,
-                contentDescription = "Tamamlandı",
+                contentDescription = stringResource(R.string.action_done),
                 tint = Color.White,
                 modifier = Modifier.size(18.dp)
             )
@@ -282,13 +286,13 @@ private fun EmptyState() {
             Text("🗓️", style = MaterialTheme.typography.headlineMedium)
             Spacer(Modifier.height(8.dp))
             Text(
-                "Bu gün için plan yok",
+                stringResource(R.string.empty_plan_title),
                 style = MaterialTheme.typography.titleMedium,
                 color = MaterialTheme.colorScheme.onSurfaceVariant
             )
             Spacer(Modifier.height(4.dp))
             Text(
-                "Sağ alttaki + ile saat aralığı ekle",
+                stringResource(R.string.empty_plan_sub),
                 style = MaterialTheme.typography.bodyMedium,
                 color = MaterialTheme.colorScheme.onSurfaceVariant
             )
@@ -296,14 +300,15 @@ private fun EmptyState() {
     }
 }
 
-private fun hourLabel(minutes: Int): String {
-    if (minutes <= 0) return "0 dk"
+@Composable
+private fun durationText(minutes: Int): String {
+    if (minutes <= 0) return stringResource(R.string.dur_zero)
     val h = minutes / 60
     val m = minutes % 60
     return when {
-        h > 0 && m > 0 -> "$h sa $m dk"
-        h > 0 -> "$h sa"
-        else -> "$m dk"
+        h > 0 && m > 0 -> stringResource(R.string.dur_h_m, h, m)
+        h > 0 -> stringResource(R.string.dur_h, h)
+        else -> stringResource(R.string.dur_m, m)
     }
 }
 

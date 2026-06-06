@@ -31,10 +31,12 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import coil.compose.AsyncImage
+import com.odak.app.R
 import com.odak.app.data.Priority
 import com.odak.app.data.RepeatRule
 import com.odak.app.data.Task
@@ -105,7 +107,7 @@ fun TaskCard(
             IconButton(onClick = onDelete) {
                 Icon(
                     Icons.Filled.Close,
-                    contentDescription = "Sil",
+                    contentDescription = stringResource(R.string.delete),
                     tint = MaterialTheme.colorScheme.onSurfaceVariant
                 )
             }
@@ -136,13 +138,13 @@ private fun StatusButton(status: TaskStatus, onClick: () -> Unit) {
         when (status) {
             TaskStatus.DONE -> Icon(
                 Icons.Filled.Check,
-                contentDescription = "Yapıldı",
+                contentDescription = stringResource(R.string.status_done),
                 tint = Color.White,
                 modifier = Modifier.size(18.dp)
             )
             TaskStatus.IN_PROGRESS -> Icon(
                 Icons.Outlined.MoreHoriz,
-                contentDescription = "Devam ediyor",
+                contentDescription = stringResource(R.string.status_in_progress),
                 tint = Color.White,
                 modifier = Modifier.size(18.dp)
             )
@@ -170,9 +172,9 @@ private fun PriorityBar(priority: Priority) {
 @Composable
 private fun MetaRow(task: Task) {
     val statusText = when (task.status) {
-        TaskStatus.WAITING -> "Bekliyor"
-        TaskStatus.IN_PROGRESS -> "Devam ediyor"
-        TaskStatus.DONE -> "Yapıldı"
+        TaskStatus.WAITING -> stringResource(R.string.status_waiting)
+        TaskStatus.IN_PROGRESS -> stringResource(R.string.status_in_progress)
+        TaskStatus.DONE -> stringResource(R.string.status_done)
     }
     val statusColor = when (task.status) {
         TaskStatus.WAITING -> MaterialTheme.colorScheme.onSurfaceVariant

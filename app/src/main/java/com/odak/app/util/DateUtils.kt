@@ -1,5 +1,7 @@
 package com.odak.app.util
 
+import android.content.Context
+import com.odak.app.R
 import java.text.SimpleDateFormat
 import java.util.Calendar
 import java.util.Locale
@@ -26,18 +28,17 @@ object DateUtils {
         return startOfDay(cal.timeInMillis)
     }
 
-    private val dayFormat = SimpleDateFormat("d MMMM EEEE", Locale("tr", "TR"))
-    private val shortDayFormat = SimpleDateFormat("EEE", Locale("tr", "TR"))
-
     /** Short weekday label (e.g. "Pzt") for the weekly report. */
-    fun shortWeekday(dayStart: Long): String = shortDayFormat.format(dayStart)
+    fun shortWeekday(dayStart: Long): String =
+        SimpleDateFormat("EEE", Locale.getDefault()).format(dayStart)
 
-    fun label(dayStart: Long): String = when (dayStart) {
-        today() -> "Bugün"
-        addDays(today(), -1) -> "Dün"
-        addDays(today(), 1) -> "Yarın"
-        else -> dayFormat.format(dayStart)
+    fun label(context: Context, dayStart: Long): String = when (dayStart) {
+        today() -> context.getString(R.string.day_today)
+        addDays(today(), -1) -> context.getString(R.string.day_yesterday)
+        addDays(today(), 1) -> context.getString(R.string.day_tomorrow)
+        else -> fullDate(dayStart)
     }
 
-    fun fullDate(dayStart: Long): String = dayFormat.format(dayStart)
+    fun fullDate(dayStart: Long): String =
+        SimpleDateFormat("d MMMM EEEE", Locale.getDefault()).format(dayStart)
 }

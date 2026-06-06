@@ -57,9 +57,9 @@ jobs:
         uses: softprops/action-gh-release@v2
         with:
           tag_name: latest
-          name: Odak — En güncel sürüm
+          name: Akış — En güncel sürüm
           body: |
-            En güncel **Odak** APK'sı. Telefonuna indir, "Bilinmeyen kaynaklar"a izin ver ve kur.
+            En güncel **Akış** APK'sı. Telefonuna indir, "Bilinmeyen kaynaklar"a izin ver ve kur.
             Doğrudan indirme: [Odak.apk](https://github.com/${{ github.repository }}/releases/latest/download/Odak.apk)
           files: Odak.apk
           make_latest: true

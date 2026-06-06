@@ -1,3 +1,170 @@
 <resources>
-    <string name="app_name">Odak</string>
+    <string name="app_name">Akış</string>
+
+    <!-- General -->
+    <string name="back">Geri</string>
+    <string name="save">Kaydet</string>
+    <string name="delete">Sil</string>
+    <string name="add">Ekle</string>
+    <string name="remove">Kaldır</string>
+    <string name="settings">Ayarlar</string>
+    <string name="prev_day">Önceki gün</string>
+    <string name="next_day">Sonraki gün</string>
+    <string name="decrease">Azalt</string>
+    <string name="increase">Artır</string>
+
+    <!-- Tabs -->
+    <string name="tab_tasks">Görevler</string>
+    <string name="tab_plan">Plan</string>
+    <string name="tab_stopwatch">Kronometre</string>
+    <string name="tab_timer">Zamanlayıcı</string>
+    <string name="tab_pomodoro">Pomodoro</string>
+
+    <!-- Day labels -->
+    <string name="day_today">Bugün</string>
+    <string name="day_yesterday">Dün</string>
+    <string name="day_tomorrow">Yarın</string>
+
+    <!-- Tasks -->
+    <string name="task_add">Görev ekle</string>
+    <string name="done_of_total">%1$d / %2$d tamamlandı</string>
+    <string name="empty_tasks_title">Bu gün için henüz görev yok</string>
+    <string name="empty_tasks_sub">Sağ alttaki + ile ilk görevini ekle</string>
+
+    <!-- Task editor -->
+    <string name="new_task">Yeni Görev</string>
+    <string name="edit_task">Görevi Düzenle</string>
+    <string name="task_title">Görev başlığı</string>
+    <string name="note_optional">Not (isteğe bağlı)</string>
+    <string name="reminder_time">Hatırlatma saati</string>
+    <string name="add_time">Saat ekle</string>
+    <string name="priority">Öncelik</string>
+    <string name="prio_low">Düşük</string>
+    <string name="prio_medium">Orta</string>
+    <string name="prio_high">Yüksek</string>
+    <string name="category_label">Kategori / etiket (isteğe bağlı)</string>
+    <string name="repeat">Tekrar</string>
+    <string name="repeat_none">Yok</string>
+    <string name="repeat_daily">Her gün</string>
+    <string name="repeat_weekdays">Hafta içi</string>
+    <string name="repeat_weekly">Haftalık</string>
+    <string name="subtasks">Alt görevler</string>
+    <string name="new_subtask">Yeni alt görev</string>
+    <string name="status">Durum</string>
+    <string name="status_waiting">Bekliyor</string>
+    <string name="status_in_progress">Devam ediyor</string>
+    <string name="status_done">Yapıldı</string>
+    <string name="photo">Fotoğraf</string>
+    <string name="task_photo">Görev fotoğrafı</string>
+    <string name="remove_photo">Fotoğrafı kaldır</string>
+    <string name="gallery">Galeri</string>
+    <string name="camera">Kamera</string>
+
+    <!-- Plan -->
+    <string name="plan_add">Plan ekle</string>
+    <string name="plan_summary">%1$d blok • toplam %2$s</string>
+    <string name="now">ŞİMDİ</string>
+    <string name="empty_plan_title">Bu gün için plan yok</string>
+    <string name="empty_plan_sub">Sağ alttaki + ile saat aralığı ekle</string>
+    <string name="new_plan">Yeni Plan</string>
+    <string name="edit_plan">Planı Düzenle</string>
+    <string name="time_range">Saat aralığı</string>
+    <string name="plan_what">Ne yapılacak?</string>
+    <string name="duration">Süre</string>
+    <string name="dur_invalid">Bitiş, başlangıçtan sonra olmalı</string>
+
+    <!-- Durations -->
+    <string name="dur_h_m">%1$d sa %2$d dk</string>
+    <string name="dur_h">%1$d sa</string>
+    <string name="dur_m">%1$d dk</string>
+    <string name="dur_zero">0 dk</string>
+
+    <!-- Settings -->
+    <string name="appearance">Görünüm</string>
+    <string name="opt_system">Sistem</string>
+    <string name="theme_light">Aydınlık</string>
+    <string name="theme_dark">Karanlık</string>
+    <string name="language">Dil</string>
+    <string name="lang_tr">Türkçe</string>
+    <string name="lang_en">English</string>
+    <string name="notifications">Bildirimler</string>
+    <string name="task_reminders">Görev hatırlatmaları</string>
+    <string name="task_reminders_sub">Bekleyen görevlerin için düzenli hatırlatma</string>
+    <string name="frequency">Sıklık</string>
+    <string name="hours_n">%1$d saat</string>
+    <string name="quiet_hours">Sessiz saatler</string>
+    <string name="quiet_hours_sub">Bu aralıkta hatırlatma gönderilmez</string>
+    <string name="this_week">Bu hafta</string>
+    <string name="week_summary">%1$d/%2$d görev tamamlandı · %3$d dk odak</string>
+    <string name="backup">Yedekleme</string>
+    <string name="backup_desc">Görevlerini JSON dosyası olarak dışa aktar ya da geri yükle (fotoğraflar hariç).</string>
+    <string name="export">Dışa aktar</string>
+    <string name="restore">Geri yükle</string>
+    <string name="backup_saved">Yedek kaydedildi</string>
+    <string name="backup_failed">Yedek alınamadı</string>
+    <string name="backup_restored">Yedek geri yüklendi</string>
+    <string name="restore_failed">Geri yükleme başarısız</string>
+    <string name="update">Güncelleme</string>
+    <string name="version_line">Sürüm %1$s · #%2$s</string>
+    <string name="checking">Kontrol ediliyor…</string>
+    <string name="downloading">İndiriliyor, birazdan kurulum açılacak…</string>
+    <string name="up_to_date">✓ En güncel sürümü kullanıyorsun</string>
+    <string name="update_available">Yeni sürüm mevcut · #%1$s</string>
+    <string name="download_install">İndir ve kur</string>
+    <string name="check_updates">Güncellemeleri kontrol et</string>
+    <string name="about">Hakkında</string>
+    <string name="about_tagline">Akış — sakin görev &amp; odaklanma uygulaması</string>
+    <string name="err_no_connection">Bağlantı kurulamadı</string>
+    <string name="err_download_failed">İndirme/kurulum başarısız</string>
+
+    <!-- Stopwatch -->
+    <string name="pause">Duraklat</string>
+    <string name="start">Başlat</string>
+    <string name="reset">Sıfırla</string>
+    <string name="lap">Tur</string>
+    <string name="lap_n">Tur %1$d</string>
+
+    <!-- Timer -->
+    <string name="minutes">Dakika</string>
+    <string name="seconds">Saniye</string>
+    <string name="min_n">%1$d dk</string>
+    <string name="timer_default_title">Zamanlayıcı</string>
+    <string name="time_up">Süre doldu</string>
+    <string name="timers_running">Zamanlayıcılar çalışıyor</string>
+    <string name="countdown_done">Zamanlayıcı tamamlandı</string>
+
+    <!-- Pomodoro -->
+    <string name="phase_work">Odak Zamanı</string>
+    <string name="phase_short_break">Kısa Mola</string>
+    <string name="phase_long_break">Uzun Mola</string>
+    <string name="completed_sessions">Tamamlanan: %1$d seans</string>
+    <string name="skip">Atla</string>
+    <string name="durations_minutes">Süreler (dakika)</string>
+    <string name="pomo_focus">Odak</string>
+    <string name="pomo_short_break">Kısa mola</string>
+    <string name="pomo_long_break">Uzun mola</string>
+    <string name="pomo_msg_focus">Mola bitti — odak zamanı!</string>
+    <string name="pomo_msg_short">Odak tamamlandı — kısa mola!</string>
+    <string name="pomo_msg_long">Odak tamamlandı — uzun mola!</string>
+    <string name="pomodoro">Pomodoro</string>
+    <string name="pomodoro_phase_title">Pomodoro · %1$s</string>
+
+    <!-- Notification channels -->
+    <string name="ch_alerts_name">Zamanlayıcı &amp; Pomodoro</string>
+    <string name="ch_alerts_desc">Süre dolduğunda sesli ve titreşimli bildirim</string>
+    <string name="ch_reminders_name">Görev hatırlatmaları</string>
+    <string name="ch_reminders_desc">Bekleyen görevler için düzenli hatırlatmalar</string>
+    <string name="ch_ongoing_name">Çalışan zamanlayıcı</string>
+    <string name="ch_ongoing_desc">Zamanlayıcı/pomodoro çalışırken kalıcı bildirim</string>
+    <string name="task_time_reached">Görev zamanı geldi</string>
+    <string name="action_done">Tamamlandı</string>
+    <string name="action_snooze">1 saat ertele</string>
+
+    <!-- Reminder worker -->
+    <string name="reminder_title">%1$d görev seni bekliyor</string>
+    <string name="reminder_more">…ve %1$d tane daha</string>
+    <string name="reminder_cta">Bugün biraz ilerleyelim mi?</string>
+
+    <!-- Widget -->
+    <string name="widget_empty">Bugün için görev yok 🌿</string>
 </resources>

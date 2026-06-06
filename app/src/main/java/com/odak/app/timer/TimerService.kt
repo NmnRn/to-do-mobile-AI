@@ -13,6 +13,7 @@ import androidx.core.app.NotificationManagerCompat
 import androidx.core.content.ContextCompat
 import com.odak.app.R
 import com.odak.app.util.Alert
+import com.odak.app.util.LocaleManager
 import com.odak.app.util.TimeFormat
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -50,6 +51,10 @@ class TimerService : Service() {
     private var ticker: Job? = null
     private var foregroundStarted = false
 
+    override fun attachBaseContext(base: Context) {
+        super.attachBaseContext(LocaleManager.wrap(base))
+    }
+
     override fun onBind(intent: Intent?): IBinder? = null
 
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
@@ -61,8 +66,8 @@ class TimerService : Service() {
                     mode = if (intent.getBooleanExtra(EXTRA_COUNT_UP, false)) Mode.STOPWATCH
                     else Mode.COUNTDOWN,
                     anchor = intent.getLongExtra(EXTRA_ANCHOR, 0L),
-                    title = intent.getStringExtra(EXTRA_TITLE) ?: "Zamanlayıcı",
-                    finishTitle = intent.getStringExtra(EXTRA_FINISH_TITLE) ?: "Süre doldu",
+                    title = intent.getStringExtra(EXTRA_TITLE) ?: getString(R.string.timer_default_title),
+                    finishTitle = intent.getStringExtra(EXTRA_FINISH_TITLE) ?: getString(R.string.time_up),
                     finishMessage = intent.getStringExtra(EXTRA_FINISH_MESSAGE) ?: "",
                     finishAlertId = intent.getIntExtra(EXTRA_FINISH_ID, 1000)
                 )
@@ -137,7 +142,7 @@ class TimerService : Service() {
             "${e.title}: $time"
         }
         val single = lines.size == 1
-        val title = if (single) entries.values.first().title else "Zamanlayıcılar çalışıyor"
+        val title = if (single) entries.values.first().title else getString(R.string.timers_running)
         val text = lines.joinToString("\n")
         return NotificationCompat.Builder(this, Alert.ONGOING_CHANNEL_ID)
             .setSmallIcon(R.drawable.ic_stat_alarm)

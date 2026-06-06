@@ -8,6 +8,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
+import com.odak.app.R
 import com.odak.app.timer.TimerService
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
@@ -33,7 +34,8 @@ class StopwatchViewModel(app: Application) : AndroidViewModel(app) {
         if (running) return
         running = true
         base = SystemClock.elapsedRealtime() - elapsed
-        TimerService.startStopwatch(getApplication<Application>(), TimerService.KEY_STOPWATCH, base, "Kronometre")
+        val ctx = getApplication<Application>()
+        TimerService.startStopwatch(ctx, TimerService.KEY_STOPWATCH, base, ctx.getString(R.string.tab_stopwatch))
         job = viewModelScope.launch {
             while (isActive) {
                 elapsed = SystemClock.elapsedRealtime() - base

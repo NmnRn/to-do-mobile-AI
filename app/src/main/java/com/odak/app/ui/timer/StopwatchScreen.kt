@@ -21,10 +21,12 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.odak.app.R
 import com.odak.app.ui.components.ControlRow
 import com.odak.app.ui.components.CircularTimer
 import com.odak.app.ui.components.PrimaryControl
@@ -54,14 +56,14 @@ fun StopwatchScreen(vm: StopwatchViewModel) {
         Spacer(Modifier.height(36.dp))
         ControlRow {
             PrimaryControl(
-                label = if (vm.running) "Duraklat" else "Başlat",
+                label = stringResource(if (vm.running) R.string.pause else R.string.start),
                 icon = if (vm.running) Icons.Filled.Pause else Icons.Filled.PlayArrow,
                 onClick = { vm.toggle() }
             )
             if (vm.running) {
-                SecondaryControl("Tur", Icons.Filled.Flag, onClick = { vm.lap() })
+                SecondaryControl(stringResource(R.string.lap), Icons.Filled.Flag, onClick = { vm.lap() })
             } else {
-                SecondaryControl("Sıfırla", Icons.Filled.Refresh, onClick = { vm.reset() })
+                SecondaryControl(stringResource(R.string.reset), Icons.Filled.Refresh, onClick = { vm.reset() })
             }
         }
 
@@ -77,7 +79,7 @@ fun StopwatchScreen(vm: StopwatchViewModel) {
                         horizontalArrangement = Arrangement.SpaceBetween
                     ) {
                         Text(
-                            "Tur ${vm.laps.size - index}",
+                            stringResource(R.string.lap_n, vm.laps.size - index),
                             color = MaterialTheme.colorScheme.onSurfaceVariant
                         )
                         Text(

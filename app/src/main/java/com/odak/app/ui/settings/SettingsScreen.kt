@@ -1,5 +1,6 @@
 package com.odak.app.ui.settings
 
+import android.app.Activity
 import android.app.TimePickerDialog
 import android.content.Context
 import android.widget.Toast
@@ -44,15 +45,18 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.compose.foundation.shape.RoundedCornerShape
 import com.odak.app.OdakApp
+import com.odak.app.R
 import com.odak.app.reminder.Reminders
 import com.odak.app.task.TaskAlarms
 import com.odak.app.ui.theme.ThemeMode
 import com.odak.app.ui.theme.ThemeViewModel
 import com.odak.app.util.Backup
 import com.odak.app.util.DateUtils
+import com.odak.app.util.LocaleManager
 import com.odak.app.util.Reports
 import com.odak.app.util.WeeklyReport
 import com.odak.app.widget.TodayWidget
@@ -68,12 +72,34 @@ fun SettingsScreen(themeVm: ThemeViewModel, updateVm: UpdateViewModel) {
             .verticalScroll(rememberScrollState())
             .padding(20.dp)
     ) {
+        val context = LocalContext.current
+
         // ---- Görünüm ----
-        SectionTitle("Görünüm")
+        SectionTitle(stringResource(R.string.appearance))
         Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-            ThemeChip("Sistem", themeVm.mode == ThemeMode.SYSTEM) { themeVm.set(ThemeMode.SYSTEM) }
-            ThemeChip("Aydınlık", themeVm.mode == ThemeMode.LIGHT) { themeVm.set(ThemeMode.LIGHT) }
-            ThemeChip("Karanlık", themeVm.mode == ThemeMode.DARK) { themeVm.set(ThemeMode.DARK) }
+            ThemeChip(stringResource(R.string.opt_system), themeVm.mode == ThemeMode.SYSTEM) { themeVm.set(ThemeMode.SYSTEM) }
+            ThemeChip(stringResource(R.string.theme_light), themeVm.mode == ThemeMode.LIGHT) { themeVm.set(ThemeMode.LIGHT) }
+            ThemeChip(stringResource(R.string.theme_dark), themeVm.mode == ThemeMode.DARK) { themeVm.set(ThemeMode.DARK) }
+        }
+
+        Spacer(Modifier.height(20.dp))
+        HorizontalDivider()
+        Spacer(Modifier.height(20.dp))
+
+        // ---- Dil ----
+        SectionTitle(stringResource(R.string.language))
+        var lang by remember { mutableStateOf(LocaleManager.language(context)) }
+        Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+            val onPick: (String) -> Unit = { picked ->
+                if (picked != lang) {
+                    lang = picked
+                    LocaleManager.setLanguage(context, picked)
+                    (context as? Activity)?.recreate()
+                }
+            }
+            ThemeChip(stringResource(R.string.opt_system), lang == LocaleManager.SYSTEM) { onPick(LocaleManager.SYSTEM) }
+            ThemeChip(stringResource(R.string.lang_tr), lang == "tr") { onPick("tr") }
+            ThemeChip(stringResource(R.string.lang_en), lang == "en") { onPick("en") }
         }
 
         Spacer(Modifier.height(20.dp))
@@ -81,8 +107,7 @@ fun SettingsScreen(themeVm: ThemeViewModel, updateVm: UpdateViewModel) {
         Spacer(Modifier.height(20.dp))
 
         // ---- Bildirimler ----
-        SectionTitle("Bildirimler")
-        val context = LocalContext.current
+        SectionTitle(stringResource(R.string.notifications))
         var remindersOn by remember { mutableStateOf(Reminders.isEnabled(context)) }
         Row(
             modifier = Modifier.fillMaxWidth(),
@@ -91,12 +116,12 @@ fun SettingsScreen(themeVm: ThemeViewModel, updateVm: UpdateViewModel) {
         ) {
             Column(Modifier.weight(1f)) {
                 Text(
-                    "Görev hatırlatmaları",
+                    stringResource(R.string.task_reminders),
                     style = MaterialTheme.typography.bodyLarge,
                     color = MaterialTheme.colorScheme.onBackground
                 )
                 Text(
-                    "Bekleyen görevlerin için düzenli hatırlatma",
+                    stringResource(R.string.task_reminders_sub),
                     style = MaterialTheme.typography.bodySmall,
                     color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
@@ -118,7 +143,7 @@ fun SettingsScreen(themeVm: ThemeViewModel, updateVm: UpdateViewModel) {
 
             Spacer(Modifier.height(16.dp))
             Text(
-                "Sıklık",
+                stringResource(R.string.frequency),
                 style = MaterialTheme.typography.bodyMedium,
                 color = MaterialTheme.colorScheme.onBackground
             )
@@ -131,7 +156,7 @@ fun SettingsScreen(themeVm: ThemeViewModel, updateVm: UpdateViewModel) {
                             interval = hours
                             Reminders.setIntervalHours(context, hours)
                         },
-                        label = { Text("$hours saat") }
+                        label = { Text(stringResource(R.string.hours_n, hours)) }
                     )
                 }
             }
@@ -144,12 +169,12 @@ fun SettingsScreen(themeVm: ThemeViewModel, updateVm: UpdateViewModel) {
             ) {
                 Column(Modifier.weight(1f)) {
                     Text(
-                        "Sessiz saatler",
+                        stringResource(R.string.quiet_hours),
                         style = MaterialTheme.typography.bodyLarge,
                         color = MaterialTheme.colorScheme.onBackground
                     )
                     Text(
-                        "Bu aralıkta hatırlatma gönderilmez",
+                        stringResource(R.string.quiet_hours_sub),
                         style = MaterialTheme.typography.bodySmall,
                         color = MaterialTheme.colorScheme.onSurfaceVariant
                     )
@@ -177,7 +202,7 @@ fun SettingsScreen(themeVm: ThemeViewModel, updateVm: UpdateViewModel) {
         Spacer(Modifier.height(20.dp))
 
         // ---- Odak raporu ----
-        SectionTitle("Bu hafta")
+        SectionTitle(stringResource(R.string.this_week))
         val app = context.applicationContext as OdakApp
         val scope = rememberCoroutineScope()
         var reloadKey by remember { mutableIntStateOf(0) }
@@ -187,7 +212,7 @@ fun SettingsScreen(themeVm: ThemeViewModel, updateVm: UpdateViewModel) {
         }
         report?.let { r ->
             Text(
-                "${r.totalDone}/${r.totalTasks} görev tamamlandı · ${r.focusMinutes} dk odak",
+                stringResource(R.string.week_summary, r.totalDone, r.totalTasks, r.focusMinutes),
                 style = MaterialTheme.typography.bodyMedium,
                 color = MaterialTheme.colorScheme.onSurfaceVariant
             )
@@ -200,7 +225,7 @@ fun SettingsScreen(themeVm: ThemeViewModel, updateVm: UpdateViewModel) {
         Spacer(Modifier.height(20.dp))
 
         // ---- Yedekleme ----
-        SectionTitle("Yedekleme")
+        SectionTitle(stringResource(R.string.backup))
         val exportLauncher = rememberLauncherForActivityResult(
             ActivityResultContracts.CreateDocument("application/json")
         ) { uri ->
@@ -216,7 +241,7 @@ fun SettingsScreen(themeVm: ThemeViewModel, updateVm: UpdateViewModel) {
                 }
                 Toast.makeText(
                     context,
-                    if (ok) "Yedek kaydedildi" else "Yedek alınamadı",
+                    context.getString(if (ok) R.string.backup_saved else R.string.backup_failed),
                     Toast.LENGTH_SHORT
                 ).show()
             }
@@ -239,26 +264,26 @@ fun SettingsScreen(themeVm: ThemeViewModel, updateVm: UpdateViewModel) {
                 reloadKey++
                 Toast.makeText(
                     context,
-                    if (ok) "Yedek geri yüklendi" else "Geri yükleme başarısız",
+                    context.getString(if (ok) R.string.backup_restored else R.string.restore_failed),
                     Toast.LENGTH_SHORT
                 ).show()
             }
         }
         Text(
-            "Görevlerini JSON dosyası olarak dışa aktar ya da geri yükle (fotoğraflar hariç).",
+            stringResource(R.string.backup_desc),
             style = MaterialTheme.typography.bodySmall,
             color = MaterialTheme.colorScheme.onSurfaceVariant
         )
         Spacer(Modifier.height(12.dp))
         Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
             OutlinedButton(
-                onClick = { exportLauncher.launch("odak-yedek.json") },
+                onClick = { exportLauncher.launch("akis-yedek.json") },
                 modifier = Modifier.weight(1f)
-            ) { Text("Dışa aktar") }
+            ) { Text(stringResource(R.string.export)) }
             OutlinedButton(
                 onClick = { importLauncher.launch(arrayOf("application/json")) },
                 modifier = Modifier.weight(1f)
-            ) { Text("Geri yükle") }
+            ) { Text(stringResource(R.string.restore)) }
         }
 
         Spacer(Modifier.height(20.dp))
@@ -266,34 +291,34 @@ fun SettingsScreen(themeVm: ThemeViewModel, updateVm: UpdateViewModel) {
         Spacer(Modifier.height(20.dp))
 
         // ---- Güncelleme ----
-        SectionTitle("Güncelleme")
+        SectionTitle(stringResource(R.string.update))
         Text(
-            "Sürüm ${updateVm.versionName} · #${updateVm.currentSha}",
+            stringResource(R.string.version_line, updateVm.versionName, updateVm.currentSha),
             style = MaterialTheme.typography.bodyMedium,
             color = MaterialTheme.colorScheme.onSurfaceVariant
         )
         Spacer(Modifier.height(12.dp))
 
         when (val s = updateVm.state) {
-            is UpdateUiState.Checking -> StatusRow(loading = true, text = "Kontrol ediliyor…")
+            is UpdateUiState.Checking -> StatusRow(loading = true, text = stringResource(R.string.checking))
             is UpdateUiState.Downloading ->
-                StatusRow(loading = true, text = "İndiriliyor, birazdan kurulum açılacak…")
+                StatusRow(loading = true, text = stringResource(R.string.downloading))
             is UpdateUiState.UpToDate ->
                 Text(
-                    "✓ En güncel sürümü kullanıyorsun",
+                    stringResource(R.string.up_to_date),
                     color = MaterialTheme.colorScheme.primary,
                     style = MaterialTheme.typography.bodyMedium
                 )
             is UpdateUiState.Available -> {
                 Text(
-                    "Yeni sürüm mevcut · #${s.sha}",
+                    stringResource(R.string.update_available, s.sha),
                     color = MaterialTheme.colorScheme.secondary,
                     style = MaterialTheme.typography.titleMedium
                 )
                 Spacer(Modifier.height(10.dp))
                 Button(onClick = { updateVm.downloadAndInstall() }) {
                     Icon(Icons.Filled.Download, contentDescription = null)
-                    Text("  İndir ve kur")
+                    Text("  " + stringResource(R.string.download_install))
                 }
             }
             is UpdateUiState.Error ->
@@ -312,7 +337,7 @@ fun SettingsScreen(themeVm: ThemeViewModel, updateVm: UpdateViewModel) {
                 updateVm.state !is UpdateUiState.Downloading
         ) {
             Icon(Icons.Filled.Refresh, contentDescription = null)
-            Text("  Güncellemeleri kontrol et")
+            Text("  " + stringResource(R.string.check_updates))
         }
 
         Spacer(Modifier.height(20.dp))
@@ -320,9 +345,9 @@ fun SettingsScreen(themeVm: ThemeViewModel, updateVm: UpdateViewModel) {
         Spacer(Modifier.height(20.dp))
 
         // ---- Hakkında ----
-        SectionTitle("Hakkında")
+        SectionTitle(stringResource(R.string.about))
         Text(
-            "Odak — sakin görev & odaklanma uygulaması",
+            stringResource(R.string.about_tagline),
             style = MaterialTheme.typography.bodyMedium,
             color = MaterialTheme.colorScheme.onSurfaceVariant
         )

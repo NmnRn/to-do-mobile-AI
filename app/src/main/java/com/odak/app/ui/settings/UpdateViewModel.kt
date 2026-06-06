@@ -7,6 +7,7 @@ import androidx.compose.runtime.setValue
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
 import com.odak.app.BuildConfig
+import com.odak.app.R
 import com.odak.app.util.UpdateManager
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -35,7 +36,7 @@ class UpdateViewModel(app: Application) : AndroidViewModel(app) {
         viewModelScope.launch {
             val sha = withContext(Dispatchers.IO) { UpdateManager.fetchLatestSha(BuildConfig.REPO) }
             state = when {
-                sha == null -> UpdateUiState.Error("Bağlantı kurulamadı")
+                sha == null -> UpdateUiState.Error(getApplication<Application>().getString(R.string.err_no_connection))
                 sha == currentSha -> UpdateUiState.UpToDate
                 else -> UpdateUiState.Available(sha)
             }
@@ -53,7 +54,7 @@ class UpdateViewModel(app: Application) : AndroidViewModel(app) {
                 UpdateManager.installApk(getApplication(), file)
                 state = UpdateUiState.Idle
             } catch (e: Exception) {
-                state = UpdateUiState.Error("İndirme/kurulum başarısız")
+                state = UpdateUiState.Error(getApplication<Application>().getString(R.string.err_download_failed))
             }
         }
     }

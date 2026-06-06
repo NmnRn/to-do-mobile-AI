@@ -35,8 +35,11 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import com.odak.app.R
 import com.odak.app.data.Task
 import com.odak.app.data.TaskStatus
 import com.odak.app.util.DateUtils
@@ -49,11 +52,12 @@ fun TasksScreen(vm: TaskViewModel) {
 
     val done = tasks.count { it.status == TaskStatus.DONE }
     val total = tasks.size
+    val context = LocalContext.current
 
     Box(modifier = Modifier.fillMaxSize()) {
         Column(modifier = Modifier.fillMaxSize()) {
             DayHeader(
-                dayLabel = DateUtils.label(vm.selectedDay),
+                dayLabel = DateUtils.label(context, vm.selectedDay),
                 fullDate = DateUtils.fullDate(vm.selectedDay),
                 done = done,
                 total = total,
@@ -90,7 +94,7 @@ fun TasksScreen(vm: TaskViewModel) {
             containerColor = MaterialTheme.colorScheme.primary,
             contentColor = MaterialTheme.colorScheme.onPrimary
         ) {
-            Icon(Icons.Filled.Add, contentDescription = "Görev ekle")
+            Icon(Icons.Filled.Add, contentDescription = stringResource(R.string.task_add))
         }
     }
 
@@ -130,19 +134,19 @@ private fun DayHeader(
                 )
             }
             IconButton(onClick = onPrev) {
-                Icon(Icons.Filled.ChevronLeft, contentDescription = "Önceki gün")
+                Icon(Icons.Filled.ChevronLeft, contentDescription = stringResource(R.string.prev_day))
             }
             IconButton(onClick = onToday) {
-                Icon(Icons.Filled.Today, contentDescription = "Bugün")
+                Icon(Icons.Filled.Today, contentDescription = stringResource(R.string.day_today))
             }
             IconButton(onClick = onNext) {
-                Icon(Icons.Filled.ChevronRight, contentDescription = "Sonraki gün")
+                Icon(Icons.Filled.ChevronRight, contentDescription = stringResource(R.string.next_day))
             }
         }
         if (total > 0) {
             Spacer(Modifier.height(8.dp))
             Text(
-                "$done / $total tamamlandı",
+                stringResource(R.string.done_of_total, done, total),
                 style = MaterialTheme.typography.labelLarge,
                 color = MaterialTheme.colorScheme.onSurfaceVariant
             )
@@ -165,13 +169,13 @@ private fun EmptyState() {
             Text("🌿", style = MaterialTheme.typography.headlineMedium)
             Spacer(Modifier.height(8.dp))
             Text(
-                "Bu gün için henüz görev yok",
+                stringResource(R.string.empty_tasks_title),
                 style = MaterialTheme.typography.titleMedium,
                 color = MaterialTheme.colorScheme.onSurfaceVariant
             )
             Spacer(Modifier.height(4.dp))
             Text(
-                "Sağ alttaki + ile ilk görevini ekle",
+                stringResource(R.string.empty_tasks_sub),
                 style = MaterialTheme.typography.bodyMedium,
                 color = MaterialTheme.colorScheme.onSurfaceVariant
             )

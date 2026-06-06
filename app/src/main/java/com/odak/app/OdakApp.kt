@@ -1,9 +1,11 @@
 package com.odak.app
 
 import android.app.Application
+import android.content.Context
 import com.odak.app.data.AppDatabase
 import com.odak.app.data.PlanRepository
 import com.odak.app.data.TaskRepository
+import com.odak.app.util.LocaleManager
 import com.odak.app.reminder.Reminders
 import com.odak.app.task.TaskAlarms
 import com.odak.app.util.Alert
@@ -18,6 +20,10 @@ class OdakApp : Application() {
     val planRepository: PlanRepository by lazy { PlanRepository(AppDatabase.get(this).planDao()) }
 
     private val appScope = CoroutineScope(SupervisorJob() + Dispatchers.IO)
+
+    override fun attachBaseContext(base: Context) {
+        super.attachBaseContext(LocaleManager.wrap(base))
+    }
 
     override fun onCreate() {
         super.onCreate()

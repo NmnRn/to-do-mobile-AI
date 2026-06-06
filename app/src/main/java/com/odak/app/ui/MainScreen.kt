@@ -29,7 +29,9 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.res.stringResource
 import androidx.lifecycle.viewmodel.compose.viewModel
+import com.odak.app.R
 import com.odak.app.ui.plan.PlanScreen
 import com.odak.app.ui.plan.PlanViewModel
 import com.odak.app.ui.settings.SettingsScreen
@@ -44,20 +46,18 @@ import com.odak.app.ui.timer.StopwatchScreen
 import com.odak.app.ui.timer.StopwatchViewModel
 import com.odak.app.ui.timer.TimerScreen
 
-private data class Tab(val label: String, val icon: ImageVector)
+private data class Tab(val labelRes: Int, val icon: ImageVector)
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun MainScreen(themeVm: ThemeViewModel) {
-    val tabs = remember {
-        listOf(
-            Tab("Görevler", Icons.Filled.TaskAlt),
-            Tab("Plan", Icons.Filled.CalendarMonth),
-            Tab("Kronometre", Icons.Filled.Timer),
-            Tab("Zamanlayıcı", Icons.Filled.HourglassEmpty),
-            Tab("Pomodoro", Icons.Filled.Spa)
-        )
-    }
+    val tabs = listOf(
+        Tab(R.string.tab_tasks, Icons.Filled.TaskAlt),
+        Tab(R.string.tab_plan, Icons.Filled.CalendarMonth),
+        Tab(R.string.tab_stopwatch, Icons.Filled.Timer),
+        Tab(R.string.tab_timer, Icons.Filled.HourglassEmpty),
+        Tab(R.string.tab_pomodoro, Icons.Filled.Spa)
+    )
     var selected by remember { mutableIntStateOf(0) }
     var showSettings by remember { mutableStateOf(false) }
 
@@ -72,18 +72,26 @@ fun MainScreen(themeVm: ThemeViewModel) {
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text(if (showSettings) "Ayarlar" else tabs[selected].label) },
+                title = {
+                    Text(stringResource(if (showSettings) R.string.settings else tabs[selected].labelRes))
+                },
                 navigationIcon = {
                     if (showSettings) {
                         IconButton(onClick = { showSettings = false }) {
-                            Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Geri")
+                            Icon(
+                                Icons.AutoMirrored.Filled.ArrowBack,
+                                contentDescription = stringResource(R.string.back)
+                            )
                         }
                     }
                 },
                 actions = {
                     if (!showSettings) {
                         IconButton(onClick = { showSettings = true }) {
-                            Icon(Icons.Filled.Settings, contentDescription = "Ayarlar")
+                            Icon(
+                                Icons.Filled.Settings,
+                                contentDescription = stringResource(R.string.settings)
+                            )
                         }
                     }
                 },
@@ -101,8 +109,8 @@ fun MainScreen(themeVm: ThemeViewModel) {
                     NavigationBarItem(
                         selected = selected == index && !showSettings,
                         onClick = { selected = index; showSettings = false },
-                        icon = { Icon(tab.icon, contentDescription = tab.label) },
-                        label = { Text(tab.label) }
+                        icon = { Icon(tab.icon, contentDescription = stringResource(tab.labelRes)) },
+                        label = { Text(stringResource(tab.labelRes)) }
                     )
                 }
             }

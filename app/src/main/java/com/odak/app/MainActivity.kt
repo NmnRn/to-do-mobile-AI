@@ -24,10 +24,15 @@ import com.odak.app.ui.theme.OdakTheme
 import com.odak.app.ui.theme.ThemeMode
 import com.odak.app.ui.theme.ThemeViewModel
 import com.odak.app.util.Alert
+import com.odak.app.util.LocaleManager
 
 class MainActivity : ComponentActivity() {
     private val requestNotificationPermission =
         registerForActivityResult(ActivityResultContracts.RequestPermission()) { }
+
+    override fun attachBaseContext(newBase: Context) {
+        super.attachBaseContext(LocaleManager.wrap(newBase))
+    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)

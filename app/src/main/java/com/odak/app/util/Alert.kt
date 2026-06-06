@@ -35,12 +35,12 @@ object Alert {
 
     fun ensureChannel(context: Context) {
         val manager = context.getSystemService(NotificationManager::class.java) ?: return
-        ensureAlertChannel(manager)
-        ensureReminderChannel(manager)
-        ensureOngoingChannel(manager)
+        ensureAlertChannel(context, manager)
+        ensureReminderChannel(context, manager)
+        ensureOngoingChannel(context, manager)
     }
 
-    private fun ensureAlertChannel(manager: NotificationManager) {
+    private fun ensureAlertChannel(context: Context, manager: NotificationManager) {
         if (manager.getNotificationChannel(CHANNEL_ID) != null) return
         val sound = RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION)
         val attrs = AudioAttributes.Builder()
@@ -49,10 +49,10 @@ object Alert {
             .build()
         val channel = NotificationChannel(
             CHANNEL_ID,
-            "Zamanlayıcı & Pomodoro",
+            context.getString(R.string.ch_alerts_name),
             NotificationManager.IMPORTANCE_HIGH
         ).apply {
-            description = "Süre dolduğunda sesli ve titreşimli bildirim"
+            description = context.getString(R.string.ch_alerts_desc)
             enableVibration(true)
             vibrationPattern = longArrayOf(0, 400, 200, 400)
             setSound(sound, attrs)
@@ -61,28 +61,28 @@ object Alert {
         manager.createNotificationChannel(channel)
     }
 
-    private fun ensureReminderChannel(manager: NotificationManager) {
+    private fun ensureReminderChannel(context: Context, manager: NotificationManager) {
         if (manager.getNotificationChannel(REMINDER_CHANNEL_ID) != null) return
         val channel = NotificationChannel(
             REMINDER_CHANNEL_ID,
-            "Görev hatırlatmaları",
+            context.getString(R.string.ch_reminders_name),
             NotificationManager.IMPORTANCE_DEFAULT
         ).apply {
-            description = "Bekleyen görevler için düzenli hatırlatmalar"
+            description = context.getString(R.string.ch_reminders_desc)
             enableVibration(true)
             lockscreenVisibility = Notification.VISIBILITY_PUBLIC
         }
         manager.createNotificationChannel(channel)
     }
 
-    private fun ensureOngoingChannel(manager: NotificationManager) {
+    private fun ensureOngoingChannel(context: Context, manager: NotificationManager) {
         if (manager.getNotificationChannel(ONGOING_CHANNEL_ID) != null) return
         val channel = NotificationChannel(
             ONGOING_CHANNEL_ID,
-            "Çalışan zamanlayıcı",
+            context.getString(R.string.ch_ongoing_name),
             NotificationManager.IMPORTANCE_LOW
         ).apply {
-            description = "Zamanlayıcı/pomodoro çalışırken kalıcı bildirim"
+            description = context.getString(R.string.ch_ongoing_desc)
             setShowBadge(false)
             setSound(null, null)
             enableVibration(false)
@@ -184,7 +184,7 @@ object Alert {
         ) return
 
         val notifId = TASK_ALARM_BASE_ID + task.id.toInt()
-        val body = task.note.ifBlank { "Görev zamanı geldi" }
+        val body = task.note.ifBlank { context.getString(R.string.task_time_reached) }
 
         val builder = NotificationCompat.Builder(context, CHANNEL_ID)
             .setSmallIcon(R.drawable.ic_stat_alarm)
@@ -197,10 +197,10 @@ object Alert {
             .setContentIntent(openAppIntent(context))
             .setFullScreenIntent(alarmFullScreenIntent(context), true)
             .setAutoCancel(true)
-            .addAction(0, "Tamamlandı", taskActionIntent(
+            .addAction(0, context.getString(R.string.action_done), taskActionIntent(
                 context, TaskActionReceiver.ACTION_DONE, task.id, notifId
             ))
-            .addAction(0, "1 saat ertele", taskActionIntent(
+            .addAction(0, context.getString(R.string.action_snooze), taskActionIntent(
                 context, TaskActionReceiver.ACTION_SNOOZE, task.id, notifId
             ))
 

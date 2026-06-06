@@ -4,6 +4,7 @@ import android.content.Context
 import androidx.work.CoroutineWorker
 import androidx.work.WorkerParameters
 import com.odak.app.OdakApp
+import com.odak.app.R
 import com.odak.app.util.Alert
 import com.odak.app.util.DateUtils
 
@@ -27,11 +28,12 @@ class ReminderWorker(
 
         val count = pending.size
         val names = pending.take(3).joinToString("\n") { "• ${it.title}" }
-        val title = "$count görev seni bekliyor"
+        val ctx = applicationContext
+        val title = ctx.getString(R.string.reminder_title, count)
         val message = buildString {
             append(names)
-            if (count > 3) append("\n…ve ${count - 3} tane daha")
-            append("\nBugün biraz ilerleyelim mi?")
+            if (count > 3) append("\n" + ctx.getString(R.string.reminder_more, count - 3))
+            append("\n" + ctx.getString(R.string.reminder_cta))
         }
         Alert.fireReminder(applicationContext, title, message)
         return Result.success()
